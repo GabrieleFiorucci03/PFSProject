@@ -2,15 +2,21 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import 'dotenv/config';
 
+function requireEnv(name: string): string {
+  const v = process.env[name];
+  if (!v) throw new Error(`Missing required env var: ${name}`);
+  return v;
+}
+
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.PG_HOST ?? 'localhost',
-      port: Number(process.env.PG_PORT ?? 5432),
-      username: process.env.PG_USERNAME ?? 'postgres',
-      password: process.env.PG_PASSWORD ?? 'PWS',
-      database: process.env.PG_DATABASE ?? 'PFSProject', 
+      host: requireEnv('PG_HOST'),
+      port: Number(requireEnv('PG_PORT')),
+      username: requireEnv('PG_USERNAME'),
+      password: requireEnv('PG_PASSWORD'),
+      database: requireEnv('PG_DATABASE'),
       autoLoadEntities: true,
       synchronize: true,
     }),
@@ -18,4 +24,3 @@ import 'dotenv/config';
   exports: [TypeOrmModule],
 })
 export class DatabaseModule {}
-
