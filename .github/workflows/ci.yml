@@ -12,20 +12,35 @@ permissions:
 jobs:
   main:
     runs-on: ubuntu-latest
-    # Definiamo le variabili d'ambiente globali per il job
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: PFSProject
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      DB_USER: ${{ secrets.DB_USER }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      # Aggiungi qui tutte le altre che hai nel .env
-    
+      PG_HOST: 127.0.0.1
+      PG_PORT: 5432
+      PG_USERNAME: postgres
+      PG_PASSWORD: postgres
+      PG_DATABASE: PFSProject
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+
     steps:
       - uses: actions/checkout@v4
         with:
           filter: tree:0
           fetch-depth: 0
-
-      - run: npx nx start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="e2e-ci"
 
       - uses: actions/setup-node@v4
         with:
@@ -34,14 +49,6 @@ jobs:
 
       - run: npm ci
 
-      # Avviamo Docker (GitHub ha già docker e docker-compose installati nei runner)
-      - name: Start Docker Services
-        run: docker-compose up -d
+      - run: npx nx format:check --base="remotes/origin/main"
 
-      - run: npx nx record -- npx nx format:check --base="remotes/origin/main"
-      
-      # Ora i test troveranno il database attivo
       - run: npx nx run-many -t lint test build typecheck e2e-ci
-      
-      - run: npx nx fix-ci
-        if: always()
