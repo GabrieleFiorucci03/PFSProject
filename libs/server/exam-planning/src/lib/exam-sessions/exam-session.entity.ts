@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { ExamEntity } from '../exams/exam.entity';
+import type { ExamEntity } from '../exams/exam.entity';
 
 @Entity('exam_sessions')
 export class ExamSessionEntity {
@@ -21,6 +21,6 @@ export class ExamSessionEntity {
     @Column({ type: 'date', nullable: false })
     planningEndDate: Date;
 
-    @OneToMany(() => ExamEntity, (exam) => exam.examSession)
+    @OneToMany('ExamEntity', (exam: ExamEntity) => exam.examSession)
     exams: ExamEntity[];
 }

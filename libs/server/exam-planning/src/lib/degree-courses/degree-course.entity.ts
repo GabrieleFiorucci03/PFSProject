@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { SubjectEntity } from '../subjects/subject.entity';
+import type { SubjectEntity } from '../subjects/subject.entity';
 
 @Entity('degree_courses')
 export class DegreeCourseEntity {
@@ -15,6 +15,6 @@ export class DegreeCourseEntity {
     @Column({type: 'varchar', length: 255, nullable: false})
     department: string;
 
-    @OneToMany(() => SubjectEntity, (subject) => subject.degreeCourse)
+    @OneToMany('SubjectEntity', (subject: SubjectEntity) => subject.degreeCourse)
     subjects: SubjectEntity[];
 }
