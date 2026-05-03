@@ -1,0 +1,26 @@
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { ExamEntity } from '../exams/exam.entity';
+
+@Entity('exam_sessions')
+export class ExamSessionEntity {
+    @PrimaryGeneratedColumn()
+    id: number;
+
+    @Column({ type: 'varchar', length: 100, nullable: false })
+    name: string;
+
+    @Column({ type: 'date', nullable: false })
+    startDate: Date;
+
+    @Column({ type: 'date', nullable: false })
+    endDate: Date;
+
+    @Column({ type: 'date', nullable: false })
+    planningStartDate: Date;
+
+    @Column({ type: 'date', nullable: false })
+    planningEndDate: Date;
+
+    @OneToMany(() => ExamEntity, (exam) => exam.examSession)
+    exams: ExamEntity[];
+}

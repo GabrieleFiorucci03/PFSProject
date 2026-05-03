@@ -1,0 +1,47 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    # Definiamo le variabili d'ambiente globali per il job
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      # Aggiungi qui tutte le altre che hai nel .env
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: tree:0
+          fetch-depth: 0
+
+      - run: npx nx start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="e2e-ci"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - run: npm ci
+
+      # Avviamo Docker (GitHub ha già docker e docker-compose installati nei runner)
+      - name: Start Docker Services
+        run: docker-compose up -d
+
+      - run: npx nx record -- npx nx format:check --base="remotes/origin/main"
+      
+      # Ora i test troveranno il database attivo
+      - run: npx nx run-many -t lint test build typecheck e2e-ci
+      
+      - run: npx nx fix-ci
+        if: always()
