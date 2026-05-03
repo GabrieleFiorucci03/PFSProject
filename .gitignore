@@ -47,4 +47,3 @@ test-output
 
 vite.config.*.timestamp*
 .env
-libs/database/src/lib/database.module.ts
