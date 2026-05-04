@@ -2,7 +2,7 @@ import { SubjectEntity } from '../subjects/subject.entity';
 import { Entity, ManyToOne, PrimaryGeneratedColumn, Unique, Column } from 'typeorm';
 import { TeacherEntity } from '../teachers/teacher.entity';
 import { ExamType } from './dto/exam-type.enum';
-import { ExamSessionEntity } from '../exam-sessions/exam-session.entity';
+import { ExamSessionEntity } from '../exam-sessions/exam-sessions.entity';
 
 @Entity('exams')
 @Unique(['date', 'subject'])

@@ -14,7 +14,7 @@ import { SecretariatsController } from './secretariats/secretariats.controller';
 import { SecretariatsService } from './secretariats/secretariats.service';
 import { DegreeCourseEntity } from './degree-courses/degree-course.entity';
 import { SubjectEntity } from './subjects/subject.entity';
-import { ExamSessionEntity } from './exam-sessions/exam-session.entity';
+import { ExamSessionEntity } from './exam-sessions/exam-sessions.entity';
 import { ExamEntity } from './exams/exam.entity';
 import { TeacherEntity } from './teachers/teacher.entity';
 import { SecretariatEntity } from './secretariats/secretariat.entity';
