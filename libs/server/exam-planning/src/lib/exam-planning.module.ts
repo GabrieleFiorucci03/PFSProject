@@ -19,6 +19,7 @@ import { ExamEntity } from './exams/exam.entity';
 import { TeacherEntity } from './teachers/teacher.entity';
 import { SecretariatEntity } from './secretariats/secretariat.entity';
 import { DegreeCoursesRepository } from './degree-courses/degree-courses.repository';
+import { ExamSessionsRepository } from './exam-sessions/exam-sessions.repository';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { DegreeCoursesRepository } from './degree-courses/degree-courses.reposit
     TeachersService,
     SecretariatsService,
     DegreeCoursesRepository,
+    ExamSessionsRepository,
   ], 
   exports: [],
 })
