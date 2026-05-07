@@ -15,7 +15,7 @@ export class ServerUsersService {
     async findByEmail(email: string): Promise<UserEntity> {
         const user = await this.usersRepository.findByEmail(email);
 
-        if(!user) throw new NotFoundException("User with email ${email} not found");
+        if(!user) throw new NotFoundException(`User with email ${email} not found`);
 
         return user;
     }
@@ -23,7 +23,7 @@ export class ServerUsersService {
     async getOneUser(id: number): Promise<UserEntity> {
         const user = await this.usersRepository.findById(id);
 
-        if(!user) throw new NotFoundException("User with id ${id} not found");
+        if(!user) throw new NotFoundException(`User with id ${id} not found`);
 
         return user;
     }
