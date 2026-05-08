@@ -62,8 +62,9 @@ export class SecretariatsController {
     update(
         @Param('secretariatId', ParseIntPipe) secretariatId: number,
         @Body() dto: UpdateSecretariatDto,
+        @CurrentUser() currentUser: AuthenticatedUser,
     ) {
-        return this.service.updateOne(secretariatId, dto);
+        return this.service.updateOne(secretariatId, dto, currentUser);
     }
 
     @Delete(':secretariatId')

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { ServerUsersService } from '@server/users';
 import { UserRole } from '@server/security';
 import type { AuthenticatedUser } from '@server/auth';
@@ -51,10 +51,17 @@ export class SecretariatsService {
     async updateOne(
         secretariatId: number,
         dto: UpdateSecretariatDto,
+        currentUser: AuthenticatedUser,
     ): Promise<SecretariatEntity> {
         const secretariat = await this.repository.findById(secretariatId);
         if (!secretariat) {
             throw new NotFoundException(`Segretario con secretariatId ${secretariatId} non trovato`);
+        }
+        if (secretariat.user.id !== currentUser.id) {
+            throw new ForbiddenException('Puoi modificare solo il tuo profilo');
+        }
+        if (dto.email !== undefined) {
+            throw new ForbiddenException('Non puoi modificare la tua email');
         }
         try {
             await this.usersService.update(secretariat.user.id, dto);
@@ -65,6 +72,7 @@ export class SecretariatsService {
             return updated;
         } catch (error) {
             if (error instanceof NotFoundException) throw error;
+            if (error instanceof ForbiddenException) throw error;
             handleDatabaseError(error, "Errore durante l'aggiornamento del segretario");
         }
     }
