@@ -6,8 +6,8 @@ import type { ExamEntity } from '../exams/exam.entity';
 @Entity('subjects')
 @Unique(['name', 'year', 'degreeCourse'])
 export class SubjectEntity {
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryGeneratedColumn({name: 'id'})
+    subjectId: number;
 
     @Column({type: 'varchar', length: 255, nullable: false})
     name: string;

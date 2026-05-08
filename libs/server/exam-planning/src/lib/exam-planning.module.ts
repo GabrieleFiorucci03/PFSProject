@@ -23,6 +23,7 @@ import { DegreeCoursesRepository } from './degree-courses/degree-courses.reposit
 import { ExamSessionsRepository } from './exam-sessions/exam-sessions.repository';
 import { TeachersRepository } from './teachers/teachers.repository';
 import { SecretariatsRepository } from './secretariats/secretariats.repository';
+import { SubjectsRepository } from './subjects/subjects.repository';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { SecretariatsRepository } from './secretariats/secretariats.repository';
     ExamSessionsRepository,
     TeachersRepository,
     SecretariatsRepository,
+    SubjectsRepository,
   ],
   exports: [],
 })
