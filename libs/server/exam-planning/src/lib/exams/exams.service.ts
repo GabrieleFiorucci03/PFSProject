@@ -177,7 +177,7 @@ export class ExamsService {
     private async resolveExamSession(examSessionId: number): Promise<ExamSessionEntity> {
         const examSession = await this.examSessionsRepository.findById(examSessionId);
         if (!examSession) {
-            throw new NotFoundException(`Sessione con id ${examSessionId} non trovata`);
+            throw new NotFoundException(`Sessione con examSessionId ${examSessionId} non trovata`);
         }
         return examSession;
     }
@@ -230,7 +230,7 @@ export class ExamsService {
         }
 
         const conflicting = await this.repository.findConflictingExam(
-            subject.degreeCourse.id,
+            subject.degreeCourse.degreeCourseId,
             subject.year,
             new Date(date),
             excludeExamId,

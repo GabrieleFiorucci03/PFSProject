@@ -26,13 +26,13 @@ export class SubjectsService {
 
     private async resolveDegreeCourse(degreeCourseId: number): Promise<DegreeCourseEntity> {
         const degreeCourse = await this.degreeCourseRepository.findById(degreeCourseId);
-        if(!degreeCourse) throw new NotFoundException(`Corso di laurea con id ${degreeCourseId} non trovato`);
+        if(!degreeCourse) throw new NotFoundException(`Corso di laurea con degreeCourseId ${degreeCourseId} non trovato`);
         return degreeCourse;
     }
 
     private async resolveTeacher(teacherId: number): Promise<TeacherEntity> {
         const teacher = await this.teacherRepository.findById(teacherId);
-        if(!teacher) throw new NotFoundException(`Insegnante con id ${teacherId} non trovato`);
+        if(!teacher) throw new NotFoundException(`Insegnante con teacherId ${teacherId} non trovato`);
         return teacher;
     }
 
@@ -53,7 +53,7 @@ export class SubjectsService {
     async findByDegreeCourse(degreeCourseId: number): Promise<SubjectEntity[]> {
         const course = await this.degreeCourseRepository.findById(degreeCourseId);
         if(!course) {
-            throw new NotFoundException(`Corso di laurea con id ${degreeCourseId} non trovato`);
+            throw new NotFoundException(`Corso di laurea con degreeCourseId ${degreeCourseId} non trovato`);
         }
         return this.repository.findByDegreeCourse(degreeCourseId);
     }

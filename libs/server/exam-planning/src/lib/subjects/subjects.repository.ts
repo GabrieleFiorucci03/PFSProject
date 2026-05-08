@@ -32,7 +32,7 @@ export class SubjectsRepository {
 
     findByDegreeCourse(degreeCourseId: number): Promise<SubjectEntity[]> {
         return this.repository.find({
-            where: { degreeCourse: { id: degreeCourseId } },
+            where: { degreeCourse: { degreeCourseId } },
             order: { year: 'ASC', name: 'ASC' },
         });
     }

@@ -36,12 +36,14 @@ export class ExamEntity {
 
     @ManyToOne(() => ExamSessionEntity, (session) => session.exams, {
         nullable: false,
+        eager: true,
         onDelete: 'RESTRICT',
     })
     examSession: ExamSessionEntity;
 
     @ManyToOne(() => TeacherEntity, (teacher) => teacher.exams, {
         nullable: false,
+        eager: true,
         onDelete: 'RESTRICT',
     })
     teacher: TeacherEntity;

@@ -6,7 +6,8 @@ import { CreateExamSessionDto } from "./dto/create-exam-session.dto";
 import { UpdateExamSessionDto } from "./dto/update-exam-session.dto";
 
 
-@Injectable() export class ExamSessionsRepository {
+@Injectable()
+export class ExamSessionsRepository {
     constructor(
         @InjectRepository(ExamSessionEntity)
         private readonly repository: Repository<ExamSessionEntity>
@@ -16,8 +17,8 @@ import { UpdateExamSessionDto } from "./dto/update-exam-session.dto";
         return this.repository.find({order: {name: 'ASC'}});
     }
 
-    findById(id: number): Promise<ExamSessionEntity | null> {
-        return this.repository.findOne({where: {id}});
+    findById(examSessionId: number): Promise<ExamSessionEntity | null> {
+        return this.repository.findOne({where: {examSessionId}});
     }
 
     async createOne(dto: CreateExamSessionDto): Promise<ExamSessionEntity> {
@@ -31,8 +32,8 @@ import { UpdateExamSessionDto } from "./dto/update-exam-session.dto";
         return this.repository.save(examSession);
     }
 
-    async updateOne(id: number, dto: UpdateExamSessionDto): Promise<ExamSessionEntity | null> {
-        const examSession = await this.findById(id);
+    async updateOne(examSessionId: number, dto: UpdateExamSessionDto): Promise<ExamSessionEntity | null> {
+        const examSession = await this.findById(examSessionId);
         if(!examSession) return null;
         if(dto.name !== undefined) examSession.name = dto.name;
         if(dto.startDate !== undefined) examSession.startDate = new Date(dto.startDate);
@@ -42,9 +43,9 @@ import { UpdateExamSessionDto } from "./dto/update-exam-session.dto";
         return this.repository.save(examSession);
     }
 
-    async deleteOne(id: number): Promise<boolean> {
-        const result = await this.repository.delete(id);
+    async deleteOne(examSessionId: number): Promise<boolean> {
+        const result = await this.repository.delete(examSessionId);
         return (result.affected ?? 0) > 0;
     }
-        
+
 }

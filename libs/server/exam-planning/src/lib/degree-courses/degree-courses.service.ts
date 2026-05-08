@@ -15,9 +15,9 @@ export class DegreeCoursesService {
         return this.repository.findAll();
     }
 
-    async findById(id: number): Promise<DegreeCourseEntity> {
-        const degreeCourse = await this.repository.findById(id);
-        if (!degreeCourse) throw new NotFoundException(`Corso di laurea con id ${id} non trovato`);
+    async findById(degreeCourseId: number): Promise<DegreeCourseEntity> {
+        const degreeCourse = await this.repository.findById(degreeCourseId);
+        if (!degreeCourse) throw new NotFoundException(`Corso di laurea con degreeCourseId ${degreeCourseId} non trovato`);
         return degreeCourse;
     }
 
@@ -29,10 +29,10 @@ export class DegreeCoursesService {
         }
     }
 
-    async updateOne(id: number, dto: UpdateDegreeCourseDto): Promise<DegreeCourseEntity> {
+    async updateOne(degreeCourseId: number, dto: UpdateDegreeCourseDto): Promise<DegreeCourseEntity> {
         try {
-            const updated = await this.repository.updateOne(id, dto);
-            if (!updated) throw new NotFoundException(`Corso di laurea con id ${id} non trovato`);
+            const updated = await this.repository.updateOne(degreeCourseId, dto);
+            if (!updated) throw new NotFoundException(`Corso di laurea con degreeCourseId ${degreeCourseId} non trovato`);
             return updated;
         } catch (error) {
             if (error instanceof NotFoundException) throw error;
@@ -40,10 +40,10 @@ export class DegreeCoursesService {
         }
     }
 
-    async deleteOne(id: number): Promise<void> {
+    async deleteOne(degreeCourseId: number): Promise<void> {
         try {
-            const deleted = await this.repository.deleteOne(id);
-            if (!deleted) throw new NotFoundException(`Corso di laurea con id ${id} non trovato`);
+            const deleted = await this.repository.deleteOne(degreeCourseId);
+            if (!deleted) throw new NotFoundException(`Corso di laurea con degreeCourseId ${degreeCourseId} non trovato`);
         } catch (error) {
             if (error instanceof NotFoundException) throw error;
             handleDatabaseError(error, "Errore durante l'eliminazione del corso di laurea");

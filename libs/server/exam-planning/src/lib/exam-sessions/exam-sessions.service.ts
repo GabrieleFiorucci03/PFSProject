@@ -36,10 +36,10 @@ export class ExamSessionsService {
         return this.repository.findAll();
     }
 
-    async findById(id: number): Promise<ExamSessionEntity> {
-        const session = await this.repository.findById(id);
+    async findById(examSessionId: number): Promise<ExamSessionEntity> {
+        const session = await this.repository.findById(examSessionId);
         if (!session) {
-            throw new NotFoundException(`Sessione con id ${id} non trovata`);
+            throw new NotFoundException(`Sessione con examSessionId ${examSessionId} non trovata`);
         }
         return session;
     }
@@ -53,8 +53,8 @@ export class ExamSessionsService {
         }
     }
 
-    async updateOne(id: number, dto: UpdateExamSessionDto): Promise<ExamSessionEntity> {
-        const session = await this.findById(id);
+    async updateOne(examSessionId: number, dto: UpdateExamSessionDto): Promise<ExamSessionEntity> {
+        const session = await this.findById(examSessionId);
         this.validateDates({
             startDate: dto.startDate ?? this.toIso(session.startDate),
             endDate: dto.endDate ?? this.toIso(session.endDate),
@@ -62,9 +62,9 @@ export class ExamSessionsService {
             planningEndDate: dto.planningEndDate ?? this.toIso(session.planningEndDate),
         });
         try {
-            const updated = await this.repository.updateOne(id, dto);
+            const updated = await this.repository.updateOne(examSessionId, dto);
             if (!updated) {
-                throw new NotFoundException(`Sessione con id ${id} non trovata`);
+                throw new NotFoundException(`Sessione con examSessionId ${examSessionId} non trovata`);
             }
             return updated;
         } catch (error) {
@@ -73,15 +73,15 @@ export class ExamSessionsService {
         }
     }
 
-    async deleteOne(id: number): Promise<void> {
+    async deleteOne(examSessionId: number): Promise<void> {
         try {
-            const deleted = await this.repository.deleteOne(id);
+            const deleted = await this.repository.deleteOne(examSessionId);
             if (!deleted) {
-                throw new NotFoundException(`Sessione di esami con id ${id} non trovata`);
+                throw new NotFoundException(`Sessione con examSessionId ${examSessionId} non trovata`);
             }
         } catch (error) {
             if (error instanceof NotFoundException) throw error;
-            handleDatabaseError(error, "Errore durante l'eliminazione della sessione di esami");
+            handleDatabaseError(error, "Errore durante l'eliminazione della sessione");
         }
     }
 }

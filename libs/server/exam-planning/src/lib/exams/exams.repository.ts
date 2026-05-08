@@ -53,7 +53,7 @@ export class ExamsRepository {
             date,
             subject: {
                 year,
-                degreeCourse: { id: degreeCourseId },
+                degreeCourse: { degreeCourseId },
             },
         };
         if (excludeExamId !== undefined) {

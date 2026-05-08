@@ -9,7 +9,7 @@ import { UpdateExamSessionDto } from './dto/update-exam-session.dto';
 @Controller('exam-sessions')
 export class ExamSessionsController {
 
-    constructor( private readonly service: ExamSessionsService) {}
+    constructor(private readonly service: ExamSessionsService) {}
 
     @Get()
     @UseGuards(JwtAuthGuard)
@@ -18,11 +18,11 @@ export class ExamSessionsController {
         return this.service.findAll();
     }
 
-    @Get(':id')
+    @Get(':examSessionId')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
-    findById(@Param('id', ParseIntPipe) id: number) {
-        return this.service.findById(id);
+    findById(@Param('examSessionId', ParseIntPipe) examSessionId: number) {
+        return this.service.findById(examSessionId);
     }
 
     @Post()
@@ -33,24 +33,24 @@ export class ExamSessionsController {
         return this.service.createOne(dto);
     }
 
-    @Patch(':id')
-     @UseGuards(JwtAuthGuard, RolesGuard)
+    @Patch(':examSessionId')
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.SEGRETERIA)
     @ApiBearerAuth()
     update(
-        @Param('id', ParseIntPipe) id: number,
+        @Param('examSessionId', ParseIntPipe) examSessionId: number,
         @Body() dto: UpdateExamSessionDto,
     ) {
-        return this.service.updateOne(id, dto);
+        return this.service.updateOne(examSessionId, dto);
     }
-    
-    @Delete(':id')
-    @UseGuards(JwtAuthGuard,RolesGuard)
+
+    @Delete(':examSessionId')
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.SEGRETERIA)
     @ApiBearerAuth()
     @HttpCode(HttpStatus.NO_CONTENT)
-    delete(@Param('id', ParseIntPipe) id: number) {
-        return this.service.deleteOne(id);
+    delete(@Param('examSessionId', ParseIntPipe) examSessionId: number) {
+        return this.service.deleteOne(examSessionId);
     }
 
 }

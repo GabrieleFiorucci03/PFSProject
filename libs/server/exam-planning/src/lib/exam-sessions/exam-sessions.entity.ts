@@ -3,8 +3,8 @@ import type { ExamEntity } from '../exams/exam.entity';
 
 @Entity('exam_sessions')
 export class ExamSessionEntity {
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryGeneratedColumn({ name: 'id' })
+    examSessionId: number;
 
     @Column({ type: 'varchar', length: 100, nullable: false })
     name: string;

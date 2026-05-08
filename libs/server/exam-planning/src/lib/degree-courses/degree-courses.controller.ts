@@ -17,11 +17,11 @@ export class DegreeCoursesController {
         return this.service.findAll();
     }
 
-    @Get(':id')
+    @Get(':degreeCourseId')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
-    findById(@Param('id', ParseIntPipe) id: number) {
-        return this.service.findById(id);
+    findById(@Param('degreeCourseId', ParseIntPipe) degreeCourseId: number) {
+        return this.service.findById(degreeCourseId);
     }
 
     @Post()
@@ -32,24 +32,24 @@ export class DegreeCoursesController {
         return this.service.createOne(dto);
     }
 
-    @Patch(':id')
+    @Patch(':degreeCourseId')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.SEGRETERIA)
     @ApiBearerAuth()
     update(
-        @Param('id', ParseIntPipe) id: number,
+        @Param('degreeCourseId', ParseIntPipe) degreeCourseId: number,
         @Body() dto: UpdateDegreeCourseDto,
     ) {
-        return this.service.updateOne(id, dto);
+        return this.service.updateOne(degreeCourseId, dto);
     }
 
-    @Delete(':id')
+    @Delete(':degreeCourseId')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.SEGRETERIA)
     @ApiBearerAuth()
     @HttpCode(HttpStatus.NO_CONTENT)
-    delete(@Param('id', ParseIntPipe) id: number) {
-        return this.service.deleteOne(id);
+    delete(@Param('degreeCourseId', ParseIntPipe) degreeCourseId: number) {
+        return this.service.deleteOne(degreeCourseId);
     }
 
 }

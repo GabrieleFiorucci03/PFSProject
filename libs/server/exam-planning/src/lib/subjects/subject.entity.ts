@@ -27,6 +27,7 @@ export class SubjectEntity {
 
     @ManyToOne(() => TeacherEntity, (teacher) => teacher.subjects, {
         nullable: false,
+        eager: true,
         onDelete: 'RESTRICT',
     })
     teacher: TeacherEntity;

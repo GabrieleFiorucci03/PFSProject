@@ -3,8 +3,8 @@ import type { SubjectEntity } from '../subjects/subject.entity';
 
 @Entity('degree_courses')
 export class DegreeCourseEntity {
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryGeneratedColumn({ name: 'id' })
+    degreeCourseId: number;
 
     @Column({type: 'varchar', length: 255, nullable: false, unique: true})
     name: string;

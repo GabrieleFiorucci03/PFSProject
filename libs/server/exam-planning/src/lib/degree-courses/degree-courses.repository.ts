@@ -16,8 +16,8 @@ export class DegreeCoursesRepository {
         return this.repository.find({order: {name: 'ASC'}});
     }
 
-    findById(id: number): Promise<DegreeCourseEntity | null> {
-        return this.repository.findOne({where: {id}});
+    findById(degreeCourseId: number): Promise<DegreeCourseEntity | null> {
+        return this.repository.findOne({where: {degreeCourseId}});
     }
 
     findByName(name: string): Promise<DegreeCourseEntity | null> {
@@ -33,17 +33,17 @@ export class DegreeCoursesRepository {
         return this.repository.save(degreeCourse);
     }
 
-    async updateOne(id: number, dto: UpdateDegreeCourseDto): Promise<DegreeCourseEntity | null>{
-        const degreeCourse = await this.findById(id);
+    async updateOne(degreeCourseId: number, dto: UpdateDegreeCourseDto): Promise<DegreeCourseEntity | null>{
+        const degreeCourse = await this.findById(degreeCourseId);
         if(!degreeCourse) return null;
         if(dto.yearsDuration !== undefined) degreeCourse.yearsDuration = dto.yearsDuration;
-        if(dto.name !== undefined)degreeCourse.name = dto.name;
-        if(dto.department !== undefined)degreeCourse.department = dto.department;
+        if(dto.name !== undefined) degreeCourse.name = dto.name;
+        if(dto.department !== undefined) degreeCourse.department = dto.department;
         return this.repository.save(degreeCourse);
     }
 
-    async deleteOne(id: number): Promise<boolean>{
-        const result = await this.repository.delete(id);
+    async deleteOne(degreeCourseId: number): Promise<boolean>{
+        const result = await this.repository.delete(degreeCourseId);
         return (result.affected ?? 0) > 0;
     }
 
