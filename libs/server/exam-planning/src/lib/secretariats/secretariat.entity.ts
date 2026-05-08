@@ -3,8 +3,8 @@ import { UserEntity } from '@server/users';
 
 @Entity('secretariats')
 export class SecretariatEntity {
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryGeneratedColumn({ name: 'id' })
+    secretariatId: number;
 
     @OneToOne(() => UserEntity, { eager: true, nullable: false, onDelete: 'CASCADE' })
     @JoinColumn()
