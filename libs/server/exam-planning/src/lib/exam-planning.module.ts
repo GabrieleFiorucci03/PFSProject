@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ServerUsersModule } from '@server/users';
 import { DegreeCoursesController } from './degree-courses/degree-courses.controller';
 import { DegreeCoursesService } from './degree-courses/degree-courses.service';
 import { SubjectsController } from './subjects/subjects.controller';
@@ -20,6 +21,7 @@ import { TeacherEntity } from './teachers/teacher.entity';
 import { SecretariatEntity } from './secretariats/secretariat.entity';
 import { DegreeCoursesRepository } from './degree-courses/degree-courses.repository';
 import { ExamSessionsRepository } from './exam-sessions/exam-sessions.repository';
+import { TeachersRepository } from './teachers/teachers.repository';
 
 @Module({
   imports: [
@@ -31,6 +33,7 @@ import { ExamSessionsRepository } from './exam-sessions/exam-sessions.repository
       TeacherEntity,
       SecretariatEntity,
     ]),
+    ServerUsersModule,
   ],
   controllers: [
     DegreeCoursesController,
@@ -49,7 +52,8 @@ import { ExamSessionsRepository } from './exam-sessions/exam-sessions.repository
     SecretariatsService,
     DegreeCoursesRepository,
     ExamSessionsRepository,
-  ], 
+    TeachersRepository,
+  ],
   exports: [],
 })
 export class ServerExamPlanningModule {}

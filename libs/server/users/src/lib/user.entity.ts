@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import { UserRole } from '@server/security';
 
 @Entity('users')
@@ -12,6 +13,7 @@ export class UserEntity {
     @Column({type:'varchar', length:320, nullable: false, unique: true})
     email: string;
 
+    @Exclude()
     @Column()
     passwordHash: string;
 

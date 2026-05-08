@@ -6,8 +6,8 @@ import type { ExamEntity } from '../exams/exam.entity';
 
 @Entity('teachers')
 export class TeacherEntity {
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryGeneratedColumn({ name: 'id' })
+    teacherId: number;
 
     @OneToOne(() => UserEntity, {eager: true, nullable: false, onDelete: 'CASCADE'})
     @JoinColumn()

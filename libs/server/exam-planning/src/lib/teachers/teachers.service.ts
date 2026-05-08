@@ -27,10 +27,10 @@ export class TeachersService {
         return teacher;
     }
 
-    async findById(id: number, currentUser: AuthenticatedUser): Promise<TeacherEntity> {
-        const teacher = await this.repository.findById(id);
+    async findById(teacherId: number, currentUser: AuthenticatedUser): Promise<TeacherEntity> {
+        const teacher = await this.repository.findById(teacherId);
         if (!teacher) {
-            throw new NotFoundException(`Docente con id ${id} non trovato`);
+            throw new NotFoundException(`Docente con teacherId ${teacherId} non trovato`);
         }
         if (currentUser.role === UserRole.DOCENTE && teacher.user.id !== currentUser.id) {
             throw new ForbiddenException('Puoi accedere solo al tuo profilo');
@@ -52,13 +52,13 @@ export class TeachersService {
     }
 
     async updateOne(
-        id: number,
+        teacherId: number,
         dto: UpdateTeacherDto,
         currentUser: AuthenticatedUser,
     ): Promise<TeacherEntity> {
-        const teacher = await this.repository.findById(id);
+        const teacher = await this.repository.findById(teacherId);
         if (!teacher) {
-            throw new NotFoundException(`Docente con id ${id} non trovato`);
+            throw new NotFoundException(`Docente con teacherId ${teacherId} non trovato`);
         }
 
         if (currentUser.role === UserRole.DOCENTE) {
@@ -72,9 +72,9 @@ export class TeachersService {
 
         try {
             await this.usersService.update(teacher.user.id, dto);
-            const updated = await this.repository.findById(id);
+            const updated = await this.repository.findById(teacherId);
             if (!updated) {
-                throw new NotFoundException(`Docente con id ${id} non trovato`);
+                throw new NotFoundException(`Docente con teacherId ${teacherId} non trovato`);
             }
             return updated;
         } catch (error) {
@@ -84,10 +84,10 @@ export class TeachersService {
         }
     }
 
-    async deleteOne(id: number): Promise<void> {
-        const teacher = await this.repository.findById(id);
+    async deleteOne(teacherId: number): Promise<void> {
+        const teacher = await this.repository.findById(teacherId);
         if (!teacher) {
-            throw new NotFoundException(`Docente con id ${id} non trovato`);
+            throw new NotFoundException(`Docente con teacherId ${teacherId} non trovato`);
         }
         try {
             await this.usersService.removeUser(teacher.user.id);

@@ -12,11 +12,11 @@ export class TeachersRepository {
     ) {}
 
     findAll(): Promise<TeacherEntity[]> {
-        return this.repository.find({ order: { id: 'ASC' } });
+        return this.repository.find({ order: { teacherId: 'ASC' } });
     }
 
-    findById(id: number): Promise<TeacherEntity | null> {
-        return this.repository.findOne({ where: { id } });
+    findById(teacherId: number): Promise<TeacherEntity | null> {
+        return this.repository.findOne({ where: { teacherId } });
     }
 
     findByUserId(userId: number): Promise<TeacherEntity | null> {
@@ -28,8 +28,8 @@ export class TeachersRepository {
         return this.repository.save(teacher);
     }
 
-    async deleteOne(id: number): Promise<boolean> {
-        const result = await this.repository.delete(id);
+    async deleteOne(teacherId: number): Promise<boolean> {
+        const result = await this.repository.delete(teacherId);
         return (result.affected ?? 0) > 0;
     }
 }
