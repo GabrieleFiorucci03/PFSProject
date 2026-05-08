@@ -1,4 +1,248 @@
-import { Injectable } from '@nestjs/common';
+import {
+    BadRequestException,
+    ConflictException,
+    ForbiddenException,
+    Injectable,
+    NotFoundException,
+} from '@nestjs/common';
+import { UserRole } from '@server/security';
+import type { AuthenticatedUser } from '@server/auth';
+import { ExamEntity } from './exam.entity';
+import { ExamsRepository, CreateExamPayload, UpdateExamPayload } from './exams.repository';
+import { CreateExamDto } from './dto/create-exam.dto';
+import { UpdateExamDto } from './dto/update-exam.dto';
+import { SubjectsRepository } from '../subjects/subjects.repository';
+import { ExamSessionsRepository } from '../exam-sessions/exam-sessions.repository';
+import { TeachersRepository } from '../teachers/teachers.repository';
+import { SubjectEntity } from '../subjects/subject.entity';
+import { ExamSessionEntity } from '../exam-sessions/exam-sessions.entity';
+import { TeacherEntity } from '../teachers/teacher.entity';
+import { handleDatabaseError } from '../database-error.helper';
 
 @Injectable()
-export class ExamsService {}
+export class ExamsService {
+    constructor(
+        private readonly repository: ExamsRepository,
+        private readonly subjectsRepository: SubjectsRepository,
+        private readonly examSessionsRepository: ExamSessionsRepository,
+        private readonly teachersRepository: TeachersRepository,
+    ) {}
+
+    findAll(): Promise<ExamEntity[]> {
+        return this.repository.findAll();
+    }
+
+    async findById(examId: number): Promise<ExamEntity> {
+        const exam = await this.repository.findById(examId);
+        if (!exam) {
+            throw new NotFoundException(`Esame con examId ${examId} non trovato`);
+        }
+        return exam;
+    }
+
+    async findOwnExams(currentUser: AuthenticatedUser): Promise<ExamEntity[]> {
+        const teacher = await this.teachersRepository.findByUserId(currentUser.id);
+        if (!teacher) {
+            throw new NotFoundException('Nessun docente associato al tuo utente');
+        }
+        return this.repository.findByTeacher(teacher.teacherId);
+    }
+
+    async findByTeacher(teacherId: number): Promise<ExamEntity[]> {
+        const teacher = await this.teachersRepository.findById(teacherId);
+        if (!teacher) {
+            throw new NotFoundException(`Docente con teacherId ${teacherId} non trovato`);
+        }
+        return this.repository.findByTeacher(teacherId);
+    }
+
+    async createOne(dto: CreateExamDto, currentUser: AuthenticatedUser): Promise<ExamEntity> {
+        const subject = await this.resolveSubject(dto.subjectId);
+        const examSession = await this.resolveExamSession(dto.examSessionId);
+        const teacher = await this.resolveOwnTeacher(currentUser);
+
+        if (subject.teacher.teacherId !== teacher.teacherId) {
+            throw new ForbiddenException('Puoi creare esami solo per le tue materie');
+        }
+
+        await this.validateExam({
+            date: dto.date,
+            startHour: dto.startHour,
+            endHour: dto.endHour,
+            subject,
+            examSession,
+            currentUser,
+        });
+
+        const payload: CreateExamPayload = {
+            date: new Date(dto.date),
+            startHour: dto.startHour,
+            endHour: dto.endHour,
+            roomType: dto.roomType,
+            type: dto.type,
+            subject,
+            examSession,
+            teacher,
+        };
+
+        try {
+            return await this.repository.createOne(payload);
+        } catch (error) {
+            handleDatabaseError(error, "Errore durante la creazione dell'esame");
+        }
+    }
+
+    async updateOne(
+        examId: number,
+        dto: UpdateExamDto,
+        currentUser: AuthenticatedUser,
+    ): Promise<ExamEntity> {
+        const existing = await this.findById(examId);
+
+        if (currentUser.role === UserRole.DOCENTE && existing.teacher.user.id !== currentUser.id) {
+            throw new ForbiddenException('Puoi modificare solo i tuoi esami');
+        }
+
+        const subject = dto.subjectId !== undefined
+            ? await this.resolveSubject(dto.subjectId)
+            : existing.subject;
+
+        const examSession = dto.examSessionId !== undefined
+            ? await this.resolveExamSession(dto.examSessionId)
+            : existing.examSession;
+
+        if (currentUser.role === UserRole.DOCENTE && subject.teacher.user.id !== currentUser.id) {
+            throw new ForbiddenException("Puoi assegnare l'esame solo a una tua materia");
+        }
+
+        await this.validateExam({
+            date: dto.date ?? this.toIso(existing.date),
+            startHour: dto.startHour ?? existing.startHour,
+            endHour: dto.endHour ?? existing.endHour,
+            subject,
+            examSession,
+            currentUser,
+            excludeExamId: examId,
+        });
+
+        const payload: UpdateExamPayload = {};
+        if (dto.date !== undefined) payload.date = new Date(dto.date);
+        if (dto.startHour !== undefined) payload.startHour = dto.startHour;
+        if (dto.endHour !== undefined) payload.endHour = dto.endHour;
+        if (dto.roomType !== undefined) payload.roomType = dto.roomType;
+        if (dto.type !== undefined) payload.type = dto.type;
+        if (dto.subjectId !== undefined) payload.subject = subject;
+        if (dto.examSessionId !== undefined) payload.examSession = examSession;
+
+        try {
+            const updated = await this.repository.updateOne(examId, payload);
+            if (!updated) {
+                throw new NotFoundException(`Esame con examId ${examId} non trovato`);
+            }
+            return updated;
+        } catch (error) {
+            if (error instanceof NotFoundException) throw error;
+            if (error instanceof ForbiddenException) throw error;
+            handleDatabaseError(error, "Errore durante l'aggiornamento dell'esame");
+        }
+    }
+
+    async deleteOne(examId: number, currentUser: AuthenticatedUser): Promise<void> {
+        const exam = await this.findById(examId);
+
+        if (currentUser.role === UserRole.DOCENTE && exam.teacher.user.id !== currentUser.id) {
+            throw new ForbiddenException('Puoi eliminare solo i tuoi esami');
+        }
+
+        try {
+            const deleted = await this.repository.deleteOne(examId);
+            if (!deleted) {
+                throw new NotFoundException(`Esame con examId ${examId} non trovato`);
+            }
+        } catch (error) {
+            if (error instanceof NotFoundException) throw error;
+            if (error instanceof ForbiddenException) throw error;
+            handleDatabaseError(error, "Errore durante l'eliminazione dell'esame");
+        }
+    }
+
+    private async resolveSubject(subjectId: number): Promise<SubjectEntity> {
+        const subject = await this.subjectsRepository.findById(subjectId);
+        if (!subject) {
+            throw new NotFoundException(`Materia con subjectId ${subjectId} non trovata`);
+        }
+        return subject;
+    }
+
+    private async resolveExamSession(examSessionId: number): Promise<ExamSessionEntity> {
+        const examSession = await this.examSessionsRepository.findById(examSessionId);
+        if (!examSession) {
+            throw new NotFoundException(`Sessione con id ${examSessionId} non trovata`);
+        }
+        return examSession;
+    }
+
+    private async resolveOwnTeacher(currentUser: AuthenticatedUser): Promise<TeacherEntity> {
+        const teacher = await this.teachersRepository.findByUserId(currentUser.id);
+        if (!teacher) {
+            throw new NotFoundException('Nessun docente associato al tuo utente');
+        }
+        return teacher;
+    }
+
+    private async validateExam(args: {
+        date: string;
+        startHour: number;
+        endHour: number;
+        subject: SubjectEntity;
+        examSession: ExamSessionEntity;
+        currentUser: AuthenticatedUser;
+        excludeExamId?: number;
+    }): Promise<void> {
+        const { date, startHour, endHour, subject, examSession, currentUser, excludeExamId } = args;
+
+        if (startHour >= endHour) {
+            throw new BadRequestException('startHour deve essere minore di endHour');
+        }
+
+        const sessionStart = this.toIso(examSession.startDate);
+        const sessionEnd = this.toIso(examSession.endDate);
+        if (date < sessionStart || date > sessionEnd) {
+            throw new BadRequestException(
+                `La data dell'esame deve essere compresa tra ${sessionStart} e ${sessionEnd}`,
+            );
+        }
+
+        if (currentUser.role === UserRole.DOCENTE) {
+            const today = this.toIso(new Date());
+            const planningStart = this.toIso(examSession.planningStartDate);
+            const planningEnd = this.toIso(examSession.planningEndDate);
+            if (today < planningStart || today > planningEnd) {
+                throw new ForbiddenException(
+                    `Puoi pianificare esami solo tra ${planningStart} e ${planningEnd}`,
+                );
+            }
+        }
+
+        const day = new Date(date).getDay();
+        if (day === 0 || day === 6) {
+            throw new BadRequestException('Non è possibile pianificare un esame nel weekend');
+        }
+
+        const conflicting = await this.repository.findConflictingExam(
+            subject.degreeCourse.id,
+            subject.year,
+            new Date(date),
+            excludeExamId,
+        );
+        if (conflicting) {
+            throw new ConflictException(
+                `Esiste già un altro esame il ${date} per il ${subject.year}° anno del corso "${subject.degreeCourse.name}"`,
+            );
+        }
+    }
+
+    private toIso(date: Date): string {
+        return date.toISOString().slice(0, 10);
+    }
+}

@@ -24,6 +24,7 @@ import { ExamSessionsRepository } from './exam-sessions/exam-sessions.repository
 import { TeachersRepository } from './teachers/teachers.repository';
 import { SecretariatsRepository } from './secretariats/secretariats.repository';
 import { SubjectsRepository } from './subjects/subjects.repository';
+import { ExamsRepository } from './exams/exams.repository';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { SubjectsRepository } from './subjects/subjects.repository';
     TeachersRepository,
     SecretariatsRepository,
     SubjectsRepository,
+    ExamsRepository,
   ],
   exports: [],
 })

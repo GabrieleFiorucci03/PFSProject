@@ -9,8 +9,8 @@ import { ExamSessionEntity } from '../exam-sessions/exam-sessions.entity';
 @Unique(['date', 'subject'])
 export class ExamEntity {
 
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryGeneratedColumn({ name: 'id' })
+    examId: number;
 
     @Column({ type: 'date', nullable: false })
     date: Date;
