@@ -1,12 +1,20 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SubjectsService } from './subjects.service';
+import { SubjectsRepository } from './subjects.repository';
+import { TeachersRepository } from '../teachers/teachers.repository';
+import { DegreeCoursesRepository } from '../degree-courses/degree-courses.repository';
 
 describe('SubjectsService', () => {
   let service: SubjectsService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [SubjectsService],
+      providers: [
+        SubjectsService,
+        { provide: SubjectsRepository, useValue: {} },
+        { provide: TeachersRepository, useValue: {} },
+        { provide: DegreeCoursesRepository, useValue: {} },
+      ],
     }).compile();
 
     service = module.get<SubjectsService>(SubjectsService);
