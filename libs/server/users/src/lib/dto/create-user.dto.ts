@@ -22,7 +22,7 @@ export class CreateUserDto {
     password: string;
 
     @IsEnum(UserRole, {
-        message: 'Valid role required among USER or ADMIN'
+        message: 'Ruolo non valido: usare DOCENTE o SEGRETERIA'
     })
     role: UserRole;
 };

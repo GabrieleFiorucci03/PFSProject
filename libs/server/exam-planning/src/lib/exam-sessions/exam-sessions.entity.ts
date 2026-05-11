@@ -6,7 +6,7 @@ export class ExamSessionEntity {
     @PrimaryGeneratedColumn({ name: 'id' })
     examSessionId: number;
 
-    @Column({ type: 'varchar', length: 100, nullable: false })
+    @Column({ type: 'varchar', length: 100, nullable: false, unique: true })
     name: string;
 
     @Column({ type: 'date', nullable: false })

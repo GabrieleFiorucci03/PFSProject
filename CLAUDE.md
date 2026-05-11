@@ -41,7 +41,7 @@ The user communicates in Italian and is learning the framework as they build, so
 ## Common Commands
 
 ```bash
-# Serve the API (port 3000 by default, or $PORT)
+# Serve the API (reads $PORT from .env; code default is 3000 if unset, .env sets 3333)
 npm run start:api          # alias for: npx nx serve api
 
 # Serve the React UI (port 4200)
@@ -71,7 +71,7 @@ npx nx e2e ui-e2e
 npx nx run-many -t typecheck
 ```
 
-Swagger UI is available at `http://localhost:3000/api/docs` when the API is running.
+Swagger UI is available at `http://localhost:<PORT>/api/docs` when the API is running (e.g. `http://localhost:3333/api/docs` with the current `.env`).
 
 ## Environment Setup
 
@@ -79,15 +79,13 @@ Copy `.env` and set the following variables before running:
 
 | Variable | Description |
 |---|---|
-| `PORT` | API listen port (default: 3333) |
+| `PORT` | API listen port (`.env` sets 3333; falls back to 3000 if unset) |
 | `PG_HOST` | Postgres host |
 | `PG_PORT` | Postgres port |
-| `PG_USERNAME` | Postgres username (note: the code reads `PG_USERNAME`, not `PG_USER`) |
+| `PG_USERNAME` | Postgres username |
 | `PG_PASSWORD` | Postgres password |
 | `PG_DATABASE` | Database name |
 | `SECRET_KEY` | JWT signing secret |
-
-> **Note:** The `.env` file uses `PG_USER` but `libs/database/src/lib/database.module.ts` reads `PG_USERNAME`. Keep them consistent.
 
 ## Architecture
 

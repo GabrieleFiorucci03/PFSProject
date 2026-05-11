@@ -3,8 +3,9 @@ import type { AuthenticatedUser } from '@server/auth';
 import { SubjectEntity } from './subject.entity';
 import {
   SubjectsRepository,
-   CreateSubjectPayload,
+  CreateSubjectPayload,
   UpdateSubjectPayload,
+  SubjectFilters,
 } from './subjects.repository';
 import { CreateSubjectDto } from './dto/create-subject.dto';
 import { UpdateSubjectDto } from './dto/update-subject.dto';
@@ -40,8 +41,14 @@ export class SubjectsService {
         if(year < 1 || year > degreeCourse.yearsDuration) throw new BadRequestException( `L'anno deve essere compreso tra 1 e ${degreeCourse.yearsDuration} per il corso "${degreeCourse.name}"`,);
     }
 
-    findAll(): Promise<SubjectEntity[]> {
-        return this.repository.findAll();        
+    async findAll(filters: SubjectFilters = {}): Promise<SubjectEntity[]> {
+        if (filters.degreeCourseId !== undefined) {
+            await this.resolveDegreeCourse(filters.degreeCourseId);
+        }
+        if (filters.teacherId !== undefined) {
+            await this.resolveTeacher(filters.teacherId);
+        }
+        return this.repository.findAllFiltered(filters);
     }
 
     async findById(subjectId: number): Promise<SubjectEntity> {
@@ -50,28 +57,12 @@ export class SubjectsService {
         return subject;
     }
 
-    async findByDegreeCourse(degreeCourseId: number): Promise<SubjectEntity[]> {
-        const course = await this.degreeCourseRepository.findById(degreeCourseId);
-        if(!course) {
-            throw new NotFoundException(`Corso di laurea con degreeCourseId ${degreeCourseId} non trovato`);
-        }
-        return this.repository.findByDegreeCourse(degreeCourseId);
-    }
-
-    async findByTeacher(teacherId: number): Promise<SubjectEntity[]> {
-        const teacher = await this.teacherRepository.findById(teacherId);
-        if(!teacher) {
-            throw new NotFoundException(`Docente con teacherId ${teacherId} non trovato`);
-        }
-        return this.repository.findByTeacher(teacherId);
-    }
-
     async findOwnSubjects(currentUser: AuthenticatedUser): Promise<SubjectEntity[]> {
         const teacher = await this.teacherRepository.findByUserId(currentUser.id);
         if(!teacher) {
             throw new NotFoundException('Nessun docente associato al tuo utente');
         }
-        return this.repository.findByTeacher(teacher.teacherId);
+        return this.repository.findAllFiltered({ teacherId: teacher.teacherId });
     }
 
     async createOne(dto: CreateSubjectDto): Promise<SubjectEntity> {

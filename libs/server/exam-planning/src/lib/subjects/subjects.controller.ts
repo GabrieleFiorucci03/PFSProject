@@ -30,16 +30,10 @@ export class SubjectsController {
     @ApiQuery({ name: 'degreeCourseId', required: false, type: Number })
     @ApiQuery({ name: 'teacherId', required: false, type: Number })
     findAll(
-        @Query('degreeCourseId') degreeCourseId?: number,
-        @Query('teacherId') teacherId?: number,
+        @Query('degreeCourseId', new ParseIntPipe({ optional: true })) degreeCourseId?: number,
+        @Query('teacherId', new ParseIntPipe({ optional: true })) teacherId?: number,
     ) {
-        if (degreeCourseId !== undefined) {
-            return this.service.findByDegreeCourse(degreeCourseId);
-        }
-        if (teacherId !== undefined) {
-            return this.service.findByTeacher(teacherId);
-        }
-        return this.service.findAll();
+        return this.service.findAll({ degreeCourseId, teacherId });
     }
 
     @Get('mine')

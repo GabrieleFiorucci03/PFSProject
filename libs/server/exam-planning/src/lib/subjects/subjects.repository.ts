@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import { SubjectEntity } from './subject.entity';
 import { DegreeCourseEntity } from '../degree-courses/degree-course.entity';
 import { TeacherEntity } from '../teachers/teacher.entity';
@@ -15,6 +15,11 @@ export type CreateSubjectPayload = {
 
 export type UpdateSubjectPayload = Partial<CreateSubjectPayload>;
 
+export type SubjectFilters = {
+    degreeCourseId?: number;
+    teacherId?: number;
+};
+
 @Injectable()
 export class SubjectsRepository {
     constructor(
@@ -22,26 +27,22 @@ export class SubjectsRepository {
         private readonly repository: Repository<SubjectEntity>,
     ) {}
 
-    findAll(): Promise<SubjectEntity[]> {
-        return this.repository.find({ order: { subjectId: 'ASC' } });
+    findAllFiltered(filters: SubjectFilters = {}): Promise<SubjectEntity[]> {
+        const where: FindOptionsWhere<SubjectEntity> = {};
+        if (filters.degreeCourseId !== undefined) {
+            where.degreeCourse = { degreeCourseId: filters.degreeCourseId };
+        }
+        if (filters.teacherId !== undefined) {
+            where.teacher = { teacherId: filters.teacherId };
+        }
+        return this.repository.find({
+            where,
+            order: { year: 'ASC', name: 'ASC' },
+        });
     }
 
     findById(subjectId: number): Promise<SubjectEntity | null> {
         return this.repository.findOne({ where: { subjectId } });
-    }
-
-    findByDegreeCourse(degreeCourseId: number): Promise<SubjectEntity[]> {
-        return this.repository.find({
-            where: { degreeCourse: { degreeCourseId } },
-            order: { year: 'ASC', name: 'ASC' },
-        });
-    }
-
-    findByTeacher(teacherId: number): Promise<SubjectEntity[]> {
-        return this.repository.find({
-            where: { teacher: { teacherId } },
-            order: { year: 'ASC', name: 'ASC' },
-        });
     }
 
     async createOne(payload: CreateSubjectPayload): Promise<SubjectEntity> {
