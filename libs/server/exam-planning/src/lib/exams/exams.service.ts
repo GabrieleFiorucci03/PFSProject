@@ -18,6 +18,7 @@ import { SubjectEntity } from '../subjects/subject.entity';
 import { ExamSessionEntity } from '../exam-sessions/exam-sessions.entity';
 import { TeacherEntity } from '../teachers/teacher.entity';
 import { handleDatabaseError } from '../database-error.helper';
+import { ExamListItem } from './interfaces/exam-list-item.interface';
 
 @Injectable()
 export class ExamsService {
@@ -28,11 +29,31 @@ export class ExamsService {
         private readonly teachersRepository: TeachersRepository,
     ) {}
 
-    findAll(): Promise<ExamEntity[]> {
-        return this.repository.findAll();
+    // FK annidate {id, name}; date come stringa ISO (YYYY-MM-DD).
+    private toListItem(exam: ExamEntity): ExamListItem {
+        return {
+            id: exam.examId,
+            date: this.toIso(exam.date),
+            startHour: exam.startHour,
+            endHour: exam.endHour,
+            roomType: exam.roomType,
+            type: exam.type,
+            subject: {
+                id: exam.subject.subjectId,
+                name: exam.subject.name,
+            },
+            examSession: {
+                id: exam.examSession.examSessionId,
+                name: exam.examSession.name,
+            },
+            teacher: {
+                id: exam.teacher.teacherId,
+                name: exam.teacher.user.name,
+            },
+        };
     }
 
-    async findById(examId: number): Promise<ExamEntity> {
+    private async getEntityById(examId: number): Promise<ExamEntity> {
         const exam = await this.repository.findById(examId);
         if (!exam) {
             throw new NotFoundException(`Esame con examId ${examId} non trovato`);
@@ -40,23 +61,34 @@ export class ExamsService {
         return exam;
     }
 
-    async findOwnExams(currentUser: AuthenticatedUser): Promise<ExamEntity[]> {
+    async findAll(): Promise<ExamListItem[]> {
+        const exams = await this.repository.findAll();
+        return exams.map((exam) => this.toListItem(exam));
+    }
+
+    async findById(examId: number): Promise<ExamListItem> {
+        return this.toListItem(await this.getEntityById(examId));
+    }
+
+    async findOwnExams(currentUser: AuthenticatedUser): Promise<ExamListItem[]> {
         const teacher = await this.teachersRepository.findByUserId(currentUser.id);
         if (!teacher) {
             throw new NotFoundException('Nessun docente associato al tuo utente');
         }
-        return this.repository.findByTeacher(teacher.teacherId);
+        const exams = await this.repository.findByTeacher(teacher.teacherId);
+        return exams.map((exam) => this.toListItem(exam));
     }
 
-    async findByTeacher(teacherId: number): Promise<ExamEntity[]> {
+    async findByTeacher(teacherId: number): Promise<ExamListItem[]> {
         const teacher = await this.teachersRepository.findById(teacherId);
         if (!teacher) {
             throw new NotFoundException(`Docente con teacherId ${teacherId} non trovato`);
         }
-        return this.repository.findByTeacher(teacherId);
+        const exams = await this.repository.findByTeacher(teacherId);
+        return exams.map((exam) => this.toListItem(exam));
     }
 
-    async createOne(dto: CreateExamDto, currentUser: AuthenticatedUser): Promise<ExamEntity> {
+    async createOne(dto: CreateExamDto, currentUser: AuthenticatedUser): Promise<ExamListItem> {
         const subject = await this.resolveSubject(dto.subjectId);
         const examSession = await this.resolveExamSession(dto.examSessionId);
         const teacher = await this.resolveOwnTeacher(currentUser);
@@ -86,7 +118,7 @@ export class ExamsService {
         };
 
         try {
-            return await this.repository.createOne(payload);
+            return this.toListItem(await this.repository.createOne(payload));
         } catch (error) {
             handleDatabaseError(error, "Errore durante la creazione dell'esame");
         }
@@ -96,8 +128,8 @@ export class ExamsService {
         examId: number,
         dto: UpdateExamDto,
         currentUser: AuthenticatedUser,
-    ): Promise<ExamEntity> {
-        const existing = await this.findById(examId);
+    ): Promise<ExamListItem> {
+        const existing = await this.getEntityById(examId);
 
         if (currentUser.role === UserRole.DOCENTE && existing.teacher.user.id !== currentUser.id) {
             throw new ForbiddenException('Puoi modificare solo i tuoi esami');
@@ -139,7 +171,7 @@ export class ExamsService {
             if (!updated) {
                 throw new NotFoundException(`Esame con examId ${examId} non trovato`);
             }
-            return updated;
+            return this.toListItem(updated);
         } catch (error) {
             if (error instanceof NotFoundException) throw error;
             if (error instanceof ForbiddenException) throw error;
@@ -148,7 +180,7 @@ export class ExamsService {
     }
 
     async deleteOne(examId: number, currentUser: AuthenticatedUser): Promise<void> {
-        const exam = await this.findById(examId);
+        const exam = await this.getEntityById(examId);
 
         if (currentUser.role === UserRole.DOCENTE && exam.teacher.user.id !== currentUser.id) {
             throw new ForbiddenException('Puoi eliminare solo i tuoi esami');
@@ -244,7 +276,8 @@ export class ExamsService {
         }
     }
 
-    private toIso(date: Date): string {
-        return date.toISOString().slice(0, 10);
+    // Robusto sia se la colonna 'date' arriva come Date sia come stringa 'YYYY-MM-DD'.
+    private toIso(date: Date | string): string {
+        return typeof date === 'string' ? date.slice(0, 10) : date.toISOString().slice(0, 10);
     }
 }

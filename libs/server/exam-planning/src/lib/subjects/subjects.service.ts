@@ -14,6 +14,7 @@ import { TeachersRepository } from '../teachers/teachers.repository';
 import { DegreeCourseEntity } from '../degree-courses/degree-course.entity';
 import { TeacherEntity } from '../teachers/teacher.entity';
 import { handleDatabaseError } from '../database-error.helper';
+import { SubjectListItem } from './interfaces/subject-list-item.interface';
 
 
 @Injectable()
@@ -24,6 +25,30 @@ export class SubjectsService {
         private readonly teacherRepository: TeachersRepository,
         private readonly degreeCourseRepository: DegreeCoursesRepository,
     ) {}
+
+    // FK annidate {id, name}: l'id serve ai form, il name alla tabella.
+    private toListItem(subject: SubjectEntity): SubjectListItem {
+        return {
+            id: subject.subjectId,
+            name: subject.name,
+            year: subject.year,
+            cfu: subject.cfu,
+            degreeCourse: {
+                id: subject.degreeCourse.degreeCourseId,
+                name: subject.degreeCourse.name,
+            },
+            teacher: {
+                id: subject.teacher.teacherId,
+                name: subject.teacher.user.name,
+            },
+        };
+    }
+
+    private async getEntityById(subjectId: number): Promise<SubjectEntity> {
+        const subject = await this.repository.findById(subjectId);
+        if(!subject) throw new NotFoundException(`Materia con subjectId ${subjectId} non trovata`);
+        return subject;
+    }
 
     private async resolveDegreeCourse(degreeCourseId: number): Promise<DegreeCourseEntity> {
         const degreeCourse = await this.degreeCourseRepository.findById(degreeCourseId);
@@ -41,31 +66,31 @@ export class SubjectsService {
         if(year < 1 || year > degreeCourse.yearsDuration) throw new BadRequestException( `L'anno deve essere compreso tra 1 e ${degreeCourse.yearsDuration} per il corso "${degreeCourse.name}"`,);
     }
 
-    async findAll(filters: SubjectFilters = {}): Promise<SubjectEntity[]> {
+    async findAll(filters: SubjectFilters = {}): Promise<SubjectListItem[]> {
         if (filters.degreeCourseId !== undefined) {
             await this.resolveDegreeCourse(filters.degreeCourseId);
         }
         if (filters.teacherId !== undefined) {
             await this.resolveTeacher(filters.teacherId);
         }
-        return this.repository.findAllFiltered(filters);
+        const subjects = await this.repository.findAllFiltered(filters);
+        return subjects.map((subject) => this.toListItem(subject));
     }
 
-    async findById(subjectId: number): Promise<SubjectEntity> {
-        const subject = await this.repository.findById(subjectId);
-        if(!subject) throw new NotFoundException(`Materia con subjectId ${subjectId} non trovata`);
-        return subject;
+    async findById(subjectId: number): Promise<SubjectListItem> {
+        return this.toListItem(await this.getEntityById(subjectId));
     }
 
-    async findOwnSubjects(currentUser: AuthenticatedUser): Promise<SubjectEntity[]> {
+    async findOwnSubjects(currentUser: AuthenticatedUser): Promise<SubjectListItem[]> {
         const teacher = await this.teacherRepository.findByUserId(currentUser.id);
         if(!teacher) {
             throw new NotFoundException('Nessun docente associato al tuo utente');
         }
-        return this.repository.findAllFiltered({ teacherId: teacher.teacherId });
+        const subjects = await this.repository.findAllFiltered({ teacherId: teacher.teacherId });
+        return subjects.map((subject) => this.toListItem(subject));
     }
 
-    async createOne(dto: CreateSubjectDto): Promise<SubjectEntity> {
+    async createOne(dto: CreateSubjectDto): Promise<SubjectListItem> {
         const degreeCourse = await this.resolveDegreeCourse(dto.degreeCourseId);
         const teacher = await this.resolveTeacher(dto.teacherId);
         this.validateYear(dto.year, degreeCourse);
@@ -79,14 +104,14 @@ export class SubjectsService {
         };
 
         try {
-            return await this.repository.createOne(payload);
+            return this.toListItem(await this.repository.createOne(payload));
         } catch (error) {
             handleDatabaseError(error, 'Errore durante la creazione della materia');
         }
     }
 
-     async updateOne(subjectId: number, dto: UpdateSubjectDto): Promise<SubjectEntity> {
-          const existing = await this.findById(subjectId);
+     async updateOne(subjectId: number, dto: UpdateSubjectDto): Promise<SubjectListItem> {
+          const existing = await this.getEntityById(subjectId);
 
           const payload: UpdateSubjectPayload = {};
           if (dto.name !== undefined) payload.name = dto.name;
@@ -110,11 +135,11 @@ export class SubjectsService {
               if (!updated) {
                   throw new NotFoundException(`Materia con subjectId ${subjectId} non trovata`);
               }
-              return updated;
+              return this.toListItem(updated);
           } catch (error) {
               if (error instanceof NotFoundException) throw error;
               handleDatabaseError(error, "Errore durante l'aggiornamento della materia");
-          } 
+          }
     }
 
     async deleteOne(subjectId: number): Promise<void> {

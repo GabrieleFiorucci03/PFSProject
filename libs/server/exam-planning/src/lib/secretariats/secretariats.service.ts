@@ -7,6 +7,7 @@ import { SecretariatsRepository } from './secretariats.repository';
 import { CreateSecretariatDto } from './dto/create-secretariat.dto';
 import { UpdateSecretariatDto } from './dto/update-secretariat.dto';
 import { handleDatabaseError } from '../database-error.helper';
+import { SecretariatListItem } from './interfaces/secretariat-list-item.interface';
 
 @Injectable()
 export class SecretariatsService {
@@ -15,33 +16,43 @@ export class SecretariatsService {
         private readonly usersService: ServerUsersService,
     ) {}
 
-    findAll(): Promise<SecretariatEntity[]> {
-        return this.repository.findAll();
+    // name/email dallo User collegato; passwordHash NON viene mai esposta.
+    private toListItem(secretariat: SecretariatEntity): SecretariatListItem {
+        return {
+            id: secretariat.secretariatId,
+            name: secretariat.user.name,
+            email: secretariat.user.email,
+        };
     }
 
-    async findOwn(currentUser: AuthenticatedUser): Promise<SecretariatEntity> {
+    async findAll(): Promise<SecretariatListItem[]> {
+        const secretariats = await this.repository.findAll();
+        return secretariats.map((secretariat) => this.toListItem(secretariat));
+    }
+
+    async findOwn(currentUser: AuthenticatedUser): Promise<SecretariatListItem> {
         const secretariat = await this.repository.findByUserId(currentUser.id);
         if (!secretariat) {
             throw new NotFoundException('Nessun segretario associato al tuo utente');
         }
-        return secretariat;
+        return this.toListItem(secretariat);
     }
 
-    async findById(secretariatId: number): Promise<SecretariatEntity> {
+    async findById(secretariatId: number): Promise<SecretariatListItem> {
         const secretariat = await this.repository.findById(secretariatId);
         if (!secretariat) {
             throw new NotFoundException(`Segretario con secretariatId ${secretariatId} non trovato`);
         }
-        return secretariat;
+        return this.toListItem(secretariat);
     }
 
-    async createOne(dto: CreateSecretariatDto): Promise<SecretariatEntity> {
+    async createOne(dto: CreateSecretariatDto): Promise<SecretariatListItem> {
         const user = await this.usersService.create({
             ...dto,
             role: UserRole.SEGRETERIA,
         });
         try {
-            return await this.repository.createOne(user);
+            return this.toListItem(await this.repository.createOne(user));
         } catch (error) {
             await this.usersService.removeUser(user.id).catch(() => undefined);
             handleDatabaseError(error, 'Errore durante la creazione del segretario');
@@ -52,7 +63,7 @@ export class SecretariatsService {
         secretariatId: number,
         dto: UpdateSecretariatDto,
         currentUser: AuthenticatedUser,
-    ): Promise<SecretariatEntity> {
+    ): Promise<SecretariatListItem> {
         const secretariat = await this.repository.findById(secretariatId);
         if (!secretariat) {
             throw new NotFoundException(`Segretario con secretariatId ${secretariatId} non trovato`);
@@ -69,7 +80,7 @@ export class SecretariatsService {
             if (!updated) {
                 throw new NotFoundException(`Segretario con secretariatId ${secretariatId} non trovato`);
             }
-            return updated;
+            return this.toListItem(updated);
         } catch (error) {
             if (error instanceof NotFoundException) throw error;
             if (error instanceof ForbiddenException) throw error;

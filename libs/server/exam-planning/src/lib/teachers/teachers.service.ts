@@ -7,6 +7,7 @@ import { TeachersRepository } from './teachers.repository';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
 import { handleDatabaseError } from '../database-error.helper';
+import { TeacherListItem } from './interfaces/teacher-list-item.interface';
 
 @Injectable()
 export class TeachersService {
@@ -15,19 +16,29 @@ export class TeachersService {
         private readonly usersService: ServerUsersService,
     ) {}
 
-    findAll(): Promise<TeacherEntity[]> {
-        return this.repository.findAll();
+    // name/email dallo User collegato; passwordHash NON viene mai esposta.
+    private toListItem(teacher: TeacherEntity): TeacherListItem {
+        return {
+            id: teacher.teacherId,
+            name: teacher.user.name,
+            email: teacher.user.email,
+        };
     }
 
-    async findOwn(currentUser: AuthenticatedUser): Promise<TeacherEntity> {
+    async findAll(): Promise<TeacherListItem[]> {
+        const teachers = await this.repository.findAll();
+        return teachers.map((teacher) => this.toListItem(teacher));
+    }
+
+    async findOwn(currentUser: AuthenticatedUser): Promise<TeacherListItem> {
         const teacher = await this.repository.findByUserId(currentUser.id);
         if (!teacher) {
             throw new NotFoundException('Nessun docente associato al tuo utente');
         }
-        return teacher;
+        return this.toListItem(teacher);
     }
 
-    async findById(teacherId: number, currentUser: AuthenticatedUser): Promise<TeacherEntity> {
+    async findById(teacherId: number, currentUser: AuthenticatedUser): Promise<TeacherListItem> {
         const teacher = await this.repository.findById(teacherId);
         if (!teacher) {
             throw new NotFoundException(`Docente con teacherId ${teacherId} non trovato`);
@@ -35,16 +46,16 @@ export class TeachersService {
         if (currentUser.role === UserRole.DOCENTE && teacher.user.id !== currentUser.id) {
             throw new ForbiddenException('Puoi accedere solo al tuo profilo');
         }
-        return teacher;
+        return this.toListItem(teacher);
     }
 
-    async createOne(dto: CreateTeacherDto): Promise<TeacherEntity> {
+    async createOne(dto: CreateTeacherDto): Promise<TeacherListItem> {
         const user = await this.usersService.create({
             ...dto,
             role: UserRole.DOCENTE,
         });
         try {
-            return await this.repository.createOne(user);
+            return this.toListItem(await this.repository.createOne(user));
         } catch (error) {
             await this.usersService.removeUser(user.id).catch(() => undefined);
             handleDatabaseError(error, 'Errore durante la creazione del docente');
@@ -55,7 +66,7 @@ export class TeachersService {
         teacherId: number,
         dto: UpdateTeacherDto,
         currentUser: AuthenticatedUser,
-    ): Promise<TeacherEntity> {
+    ): Promise<TeacherListItem> {
         const teacher = await this.repository.findById(teacherId);
         if (!teacher) {
             throw new NotFoundException(`Docente con teacherId ${teacherId} non trovato`);
@@ -76,7 +87,7 @@ export class TeachersService {
             if (!updated) {
                 throw new NotFoundException(`Docente con teacherId ${teacherId} non trovato`);
             }
-            return updated;
+            return this.toListItem(updated);
         } catch (error) {
             if (error instanceof NotFoundException) throw error;
             if (error instanceof ForbiddenException) throw error;
