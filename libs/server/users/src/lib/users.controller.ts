@@ -26,11 +26,6 @@ export class ServerUsersController {
         return user;
     }
 
-    @Get('interns') // GET /users/interns
-    getInternUsers() {
-        return "API non implementata";
-    }
-
     @Get(':id') // GET /users/:id
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.SEGRETERIA,UserRole.DOCENTE)
@@ -40,6 +35,9 @@ export class ServerUsersController {
     }
 
     @Post() // POST /users
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.SEGRETERIA)
+    @ApiBearerAuth()
     @ApiBody({
         schema: {
             type: 'object',

@@ -12,12 +12,11 @@ export class ServerUsersService {
     // Injecting the repository
     constructor(private readonly usersRepository: UsersRepository){}
 
-    async findByEmail(email: string): Promise<UserEntity> {
-        const user = await this.usersRepository.findByEmail(email);
-
-        if(!user) throw new NotFoundException(`User with email ${email} not found`);
-
-        return user;
+    async findByEmail(email: string): Promise<UserEntity | null> {
+        // Ritorna null se non trovato: il chiamante (auth validateUser) decide la
+        // risposta. Evita di distinguere "email inesistente" (404) da "password
+        // errata" (401), che permetterebbe user enumeration.
+        return this.usersRepository.findByEmail(email);
     }
 
     async getOneUser(id: number): Promise<UserEntity> {
@@ -29,13 +28,8 @@ export class ServerUsersService {
     }
 
     async getUsers(role?: UserRole): Promise<UserEntity[]> {
-        const users = await this.usersRepository.findAll(role);
-        
-        if(role && users.length===0)
-        {
-            throw new NotFoundException(`No users found with role ${role}`);
-        }
-        return users;
+        // Lista vuota -> 200 con []: un filtro senza risultati non e' un errore.
+        return this.usersRepository.findAll(role);
     }
 
     async create(dto: CreateUserDto): Promise<UserEntity> {

@@ -1,4 +1,4 @@
-import { NotFoundException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ServerUsersService } from '@server/users';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -15,7 +15,7 @@ export class ServerAuthService {
     async validateUser(email: string, password: string): Promise<AuthenticatedUser> {
         const user = await this.usersService.findByEmail(email);
 
-        if(!user) throw new NotFoundException("Credentials not valid");
+        if(!user) throw new UnauthorizedException("Credentials not valid!");
 
         const passwordMatches = await bcrypt.compare(password,user.passwordHash);
         if(!passwordMatches) {

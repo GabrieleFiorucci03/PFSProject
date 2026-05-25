@@ -224,7 +224,9 @@ export class ExamsService {
             }
         }
 
-        const day = new Date(date).getDay();
+        // getUTCDay: date e' 'YYYY-MM-DD' (parsata come mezzanotte UTC); getDay()
+        // userebbe il fuso del server e potrebbe sfasare il giorno della settimana.
+        const day = new Date(date).getUTCDay();
         if (day === 0 || day === 6) {
             throw new BadRequestException('Non è possibile pianificare un esame nel weekend');
         }

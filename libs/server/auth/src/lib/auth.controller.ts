@@ -1,10 +1,10 @@
 import { Controller, UseGuards, Post, Request, Body, ValidationPipe } from '@nestjs/common';
-import { ApiTags, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { ServerAuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { AuthenticatedUser } from './interfaces/authenticated-user.interface';
 import { LocalAuthGuard } from './guards/local-auth.guard';
-import { UserRole } from '@server/security';
+import { JwtAuthGuard, Roles, RolesGuard, UserRole } from '@server/security';
 
 type RequestWithUser = Request & {
   user: AuthenticatedUser;
@@ -32,6 +32,9 @@ export class ServerAuthController {
   }
 
   @Post('register')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SEGRETERIA)
+  @ApiBearerAuth()
   @ApiBody({
           schema: {
               type: 'object',
