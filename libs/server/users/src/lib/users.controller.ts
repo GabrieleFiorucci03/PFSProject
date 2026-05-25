@@ -61,12 +61,13 @@ export class ServerUsersController {
     @ApiBody({
         schema: {
             type: 'object',
+            // UpdateUserDto e' PartialType(OmitType(CreateUserDto, ['password'])):
+            // tutti i campi sono opzionali, quindi nessun 'required'.
             properties: {
                 name: { type: 'string', example: 'Devis' },
                 email: { type: 'string', example: 'bianchin@unibs.it' },
                 role: { type: 'string', enum: Object.values(UserRole), example: UserRole.DOCENTE}
             },
-            required: ['name', 'email', 'role'],
         },
     })
     update(@Param('id', ParseIntPipe) id: number, @Body(ValidationPipe) userUpdate: UpdateUserDto) {

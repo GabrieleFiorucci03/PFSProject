@@ -72,7 +72,10 @@ export class SecretariatsController {
     @Roles(UserRole.SEGRETERIA)
     @ApiBearerAuth()
     @HttpCode(HttpStatus.NO_CONTENT)
-    delete(@Param('secretariatId', ParseIntPipe) secretariatId: number) {
-        return this.service.deleteOne(secretariatId);
+    delete(
+        @Param('secretariatId', ParseIntPipe) secretariatId: number,
+        @CurrentUser() currentUser: AuthenticatedUser,
+    ) {
+        return this.service.deleteOne(secretariatId, currentUser);
     }
 }

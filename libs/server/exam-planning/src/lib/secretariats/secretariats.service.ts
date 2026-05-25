@@ -88,15 +88,20 @@ export class SecretariatsService {
         }
     }
 
-    async deleteOne(secretariatId: number): Promise<void> {
+    async deleteOne(secretariatId: number, currentUser: AuthenticatedUser): Promise<void> {
         const secretariat = await this.repository.findById(secretariatId);
         if (!secretariat) {
             throw new NotFoundException(`Segretario con secretariatId ${secretariatId} non trovato`);
+        }
+        // Self-only: un segretario può eliminare solo il proprio account.
+        if (secretariat.user.id !== currentUser.id) {
+            throw new ForbiddenException('Puoi eliminare solo il tuo account');
         }
         try {
             await this.usersService.removeUser(secretariat.user.id);
         } catch (error) {
             if (error instanceof NotFoundException) throw error;
+            if (error instanceof ForbiddenException) throw error;
             handleDatabaseError(error, "Errore durante l'eliminazione del segretario");
         }
     }

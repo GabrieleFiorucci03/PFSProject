@@ -53,12 +53,21 @@ export class ServerUsersService {
             }
         }
 
-        const updated = await this.usersRepository.updateOne(id, dto);
-        if (!updated) {
-            throw new NotFoundException(`User with id ${id} not found`);
+        try {
+            const updated = await this.usersRepository.updateOne(id, dto);
+            if (!updated) {
+                throw new NotFoundException(`User with id ${id} not found`);
+            }
+            return updated;
+        } catch (error) {
+            if (error instanceof NotFoundException) throw error;
+            // pg unique_violation: email duplicata in una race concorrente
+            // (il pre-check sopra non copre due update simultanei).
+            if ((error as { code?: string })?.code === '23505') {
+                throw new ConflictException('Email already in use');
+            }
+            throw error;
         }
-
-        return updated;
     }
 
     async removeUser(id: number): Promise<void> {
