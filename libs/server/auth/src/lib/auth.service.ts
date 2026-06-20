@@ -15,11 +15,11 @@ export class ServerAuthService {
     async validateUser(email: string, password: string): Promise<AuthenticatedUser> {
         const user = await this.usersService.findByEmail(email);
 
-        if(!user) throw new UnauthorizedException("Credentials not valid!");
+        if(!user) throw new UnauthorizedException('Credenziali non valide');
 
         const passwordMatches = await bcrypt.compare(password,user.passwordHash);
         if(!passwordMatches) {
-            throw new UnauthorizedException("Credentials not valid!");
+            throw new UnauthorizedException('Credenziali non valide');
         }
 
         const { passwordHash, ...result } = user;

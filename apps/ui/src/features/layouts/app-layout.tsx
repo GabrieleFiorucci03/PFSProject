@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { useState } from 'react';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { getCurrentUser } from '../auth/auth.api';
 
 /**
@@ -19,6 +20,10 @@ const navItems = [
 
 export function AppLayout() {
   const user = getCurrentUser();
+  const navigate = useNavigate();
+
+  // Stato del popup di conferma logout: true = popup visibile.
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   // Classe del link: evidenzia la rotta attiva (NavLink passa isActive).
   function linkClass({ isActive }: { isActive: boolean }) {
@@ -52,12 +57,13 @@ export function AppLayout() {
                 </span>
               </span>
             )}
-            <NavLink
-              to="/logout"
+            <button
+              type="button"
+              onClick={() => setShowLogoutConfirm(true)}
               className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium transition hover:bg-blue-500"
             >
               Logout
-            </NavLink>
+            </button>
           </div>
         </div>
       </nav>
@@ -65,6 +71,44 @@ export function AppLayout() {
       <main className="mx-auto max-w-6xl p-4">
         <Outlet />
       </main>
+
+      {/* Popup di conferma logout: appare solo quando showLogoutConfirm è true.
+          L'overlay scuro copre la pagina; cliccandolo si annulla (chiude). */}
+      {showLogoutConfirm && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setShowLogoutConfirm(false)}
+        >
+          {/* stopPropagation: il click sulla card non deve chiudere il popup */}
+          <div
+            className="w-full max-w-sm rounded-xl bg-white p-6 shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-lg font-semibold text-slate-800">
+              Conferma logout
+            </h2>
+            <p className="mt-2 text-sm text-slate-500">
+              Vuoi davvero uscire dalla sessione?
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowLogoutConfirm(false)}
+                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+              >
+                Annulla
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/logout')}
+                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700"
+              >
+                Esci
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
