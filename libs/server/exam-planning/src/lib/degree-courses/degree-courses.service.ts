@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import type { AuthenticatedUser } from '@server/auth';
 import { DegreeCourseEntity } from './degree-course.entity';
 import { DegreeCoursesRepository } from './degree-courses.repository';
+import { TeachersRepository } from '../teachers/teachers.repository';
 import { handleDatabaseError } from '../database-error.helper';
 import { UpdateDegreeCourseDto } from './dto/update-degree-course.dto';
 import { CreateDegreeCourseDto } from './dto/create-degree-course.dto';
@@ -10,6 +12,7 @@ import { DegreeCourseListItem } from './interfaces/degree-course-list-item.inter
 export class DegreeCoursesService {
     constructor(
         private readonly repository: DegreeCoursesRepository,
+        private readonly teacherRepository: TeachersRepository,
     ) {}
 
     private toListItem(dc: DegreeCourseEntity): DegreeCourseListItem {
@@ -30,6 +33,16 @@ export class DegreeCoursesService {
         const degreeCourse = await this.repository.findById(degreeCourseId);
         if (!degreeCourse) throw new NotFoundException(`Corso di laurea con degreeCourseId ${degreeCourseId} non trovato`);
         return this.toListItem(degreeCourse);
+    }
+
+    // Solo i corsi di laurea assegnati al docente corrente (via i suoi subjects).
+    async findOwnDegreeCourses(currentUser: AuthenticatedUser): Promise<DegreeCourseListItem[]> {
+        const teacher = await this.teacherRepository.findByUserId(currentUser.id);
+        if (!teacher) {
+            throw new NotFoundException('Nessun docente associato al tuo utente');
+        }
+        const degreeCourses = await this.repository.findByTeacherId(teacher.teacherId);
+        return degreeCourses.map((dc) => this.toListItem(dc));
     }
 
     async createOne(dto: CreateDegreeCourseDto): Promise<DegreeCourseListItem> {

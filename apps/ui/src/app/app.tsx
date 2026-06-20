@@ -3,6 +3,9 @@ import { LoginPage } from '../features/auth/login.page';
 import { LogoutPage } from '../features/auth/logout.page';
 import { ProtectedRoute } from '../features/auth/protected-route';
 import { AppLayout } from '../features/layouts/app-layout';
+import { DegreeCoursesPage } from '../features/degree-courses/degree-courses.page';
+import { CreateDegreeCoursePage } from '../features/degree-courses/create-degree-course.page';
+import { EditDegreeCoursePage } from '../features/degree-courses/edit-degree-course.page';
 
 /**
  * Placeholder temporaneo per le rotte entità non ancora implementate.
@@ -40,9 +43,11 @@ export function App() {
           element={<Placeholder title="Sessioni d'esame" />}
         />
         <Route path="/subjects" element={<Placeholder title="Insegnamenti" />} />
+        <Route path="/degree-courses" element={<DegreeCoursesPage />} />
+        <Route path="/degree-courses/new" element={<CreateDegreeCoursePage />} />
         <Route
-          path="/degree-courses"
-          element={<Placeholder title="Corsi di laurea" />}
+          path="/degree-courses/:id/edit"
+          element={<EditDegreeCoursePage />}
         />
         <Route path="/teachers" element={<Placeholder title="Docenti" />} />
       </Route>

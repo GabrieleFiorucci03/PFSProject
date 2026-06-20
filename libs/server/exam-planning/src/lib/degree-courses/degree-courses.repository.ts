@@ -20,6 +20,17 @@ export class DegreeCoursesRepository {
         return this.repository.findOne({where: {degreeCourseId}});
     }
 
+    // Corsi di laurea "assegnati" a un docente: quelli che hanno almeno un
+    // insegnamento (subject) tenuto da quel docente. Il legame è indiretto
+    // (degreeCourse -> subjects -> teacher); il where annidato genera i join e
+    // l'hydration di TypeORM restituisce i corsi distinti.
+    findByTeacherId(teacherId: number): Promise<DegreeCourseEntity[]> {
+        return this.repository.find({
+            where: { subjects: { teacher: { teacherId } } },
+            order: { name: 'ASC' },
+        });
+    }
+
     findByName(name: string): Promise<DegreeCourseEntity | null> {
         return this.repository.findOne({where: {name}});
     }

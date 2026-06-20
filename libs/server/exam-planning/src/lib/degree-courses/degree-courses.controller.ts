@@ -1,7 +1,8 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { DegreeCoursesService } from './degree-courses.service';
-import { JwtAuthGuard, Roles, RolesGuard, UserRole } from '@server/security';
+import { CurrentUser, JwtAuthGuard, Roles, RolesGuard, UserRole } from '@server/security';
+import type { AuthenticatedUser } from '@server/auth';
 import { CreateDegreeCourseDto } from './dto/create-degree-course.dto';
 import { UpdateDegreeCourseDto } from './dto/update-degree-course.dto';
 
@@ -15,6 +16,16 @@ export class DegreeCoursesController {
     @ApiBearerAuth()
     findAll() {
         return this.service.findAll();
+    }
+
+    // NB: 'mine' deve stare PRIMA di ':degreeCourseId', altrimenti verrebbe
+    // interpretato come id e ParseIntPipe fallirebbe.
+    @Get('mine')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.DOCENTE)
+    @ApiBearerAuth()
+    findOwn(@CurrentUser() currentUser: AuthenticatedUser) {
+        return this.service.findOwnDegreeCourses(currentUser);
     }
 
     @Get(':degreeCourseId')

@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DegreeCoursesService } from './degree-courses.service';
 import { DegreeCoursesRepository } from './degree-courses.repository';
+import { TeachersRepository } from '../teachers/teachers.repository';
 
 describe('DegreeCoursesService', () => {
   let service: DegreeCoursesService;
@@ -10,6 +11,7 @@ describe('DegreeCoursesService', () => {
       providers: [
         DegreeCoursesService,
         { provide: DegreeCoursesRepository, useValue: {} },
+        { provide: TeachersRepository, useValue: {} },
       ],
     }).compile();
 
