@@ -11,8 +11,10 @@ import { UpdateDegreeCourseDto } from './dto/update-degree-course.dto';
 export class DegreeCoursesController {
     constructor(private readonly service: DegreeCoursesService) {}
 
+    // Lista completa: solo SEGRETERIA. Il DOCENTE usa GET /mine (i suoi corsi).
     @Get()
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.SEGRETERIA)
     @ApiBearerAuth()
     findAll() {
         return this.service.findAll();
