@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { fetchDegreeCourseById, updateDegreeCourse } from './degree-courses.api';
+import {
+  fetchDegreeCourseById,
+  fetchDepartments,
+  updateDegreeCourse,
+} from './degree-courses.api';
 
 /**
  * Form di modifica di un corso di laurea (solo SEGRETERIA).
@@ -14,6 +18,7 @@ export function EditDegreeCoursePage() {
   const [name, setName] = useState('');
   const [yearsDuration, setYearsDuration] = useState(3);
   const [department, setDepartment] = useState('');
+  const [departments, setDepartments] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -31,6 +36,13 @@ export function EditDegreeCoursePage() {
       )
       .finally(() => setLoading(false));
   }, [courseId]);
+
+  // Carica i dipartimenti esistenti per i suggerimenti del menu a tendina.
+  useEffect(() => {
+    fetchDepartments()
+      .then(setDepartments)
+      .catch(() => setDepartments([]));
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -99,11 +111,18 @@ export function EditDegreeCoursePage() {
           </label>
           <input
             id="department"
+            list="departments-list"
+            autoComplete="off"
             className="rounded-lg border border-slate-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             value={department}
             onChange={(e) => setDepartment(e.target.value)}
             required
           />
+          <datalist id="departments-list">
+            {departments.map((dep) => (
+              <option key={dep} value={dep} />
+            ))}
+          </datalist>
         </div>
 
         {error && (

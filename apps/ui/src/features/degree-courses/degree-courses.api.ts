@@ -18,6 +18,15 @@ export async function fetchDegreeCourses(): Promise<DegreeCourseListItem[]> {
   return response.json();
 }
 
+/**
+ * Elenco dei dipartimenti esistenti (valori distinti), per i suggerimenti del
+ * form. I dipartimenti non sono un'entità a sé: li ricaviamo dai corsi.
+ */
+export async function fetchDepartments(): Promise<string[]> {
+  const courses = await fetchDegreeCourses();
+  return [...new Set(courses.map((c) => c.department))].sort();
+}
+
 /** Solo i corsi assegnati al docente corrente (uso DOCENTE). */
 export async function fetchMyDegreeCourses(): Promise<DegreeCourseListItem[]> {
   const response = await fetch(`${RESOURCE}/mine`, { headers: getAuthHeaders() });

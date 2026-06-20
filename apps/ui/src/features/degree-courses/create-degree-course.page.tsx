@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createDegreeCourse } from './degree-courses.api';
+import { createDegreeCourse, fetchDepartments } from './degree-courses.api';
 
 /**
  * Form di creazione di un corso di laurea (solo SEGRETERIA).
@@ -12,8 +12,16 @@ export function CreateDegreeCoursePage() {
   const [name, setName] = useState('');
   const [yearsDuration, setYearsDuration] = useState(3);
   const [department, setDepartment] = useState('');
+  const [departments, setDepartments] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  // Carica i dipartimenti esistenti per i suggerimenti del menu a tendina.
+  useEffect(() => {
+    fetchDepartments()
+      .then(setDepartments)
+      .catch(() => setDepartments([])); // niente suggerimenti se la fetch fallisce
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -79,12 +87,21 @@ export function CreateDegreeCoursePage() {
           </label>
           <input
             id="department"
+            list="departments-list"
+            autoComplete="off"
             className="rounded-lg border border-slate-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             value={department}
             onChange={(e) => setDepartment(e.target.value)}
-            placeholder="Es. Dipartimento di Ingegneria dell'Informazione"
+            placeholder="Scegli un dipartimento o digitane uno nuovo"
             required
           />
+          {/* Suggerimenti: i dipartimenti già esistenti. Resta possibile
+              digitarne uno nuovo (non è un <select> che vincola le scelte). */}
+          <datalist id="departments-list">
+            {departments.map((dep) => (
+              <option key={dep} value={dep} />
+            ))}
+          </datalist>
         </div>
 
         {error && (
