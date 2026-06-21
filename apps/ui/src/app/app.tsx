@@ -9,6 +9,9 @@ import { EditDegreeCoursePage } from '../features/degree-courses/edit-degree-cou
 import { ExamSessionsPage } from '../features/exam-sessions/exam-sessions.page';
 import { CreateExamSessionPage } from '../features/exam-sessions/create-exam-session.page';
 import { EditExamSessionPage } from '../features/exam-sessions/edit-exam-session.page';
+import { TeachersPage } from '../features/teachers/teachers.page';
+import { CreateTeacherPage } from '../features/teachers/create-teacher.page';
+import { EditTeacherPage } from '../features/teachers/edit-teacher.page';
 
 /**
  * Placeholder temporaneo per le rotte entità non ancora implementate.
@@ -54,7 +57,9 @@ export function App() {
           path="/degree-courses/:id/edit"
           element={<EditDegreeCoursePage />}
         />
-        <Route path="/teachers" element={<Placeholder title="Docenti" />} />
+        <Route path="/teachers" element={<TeachersPage />} />
+        <Route path="/teachers/new" element={<CreateTeacherPage />} />
+        <Route path="/teachers/:id/edit" element={<EditTeacherPage />} />
       </Route>
 
       {/* Qualsiasi altra rotta torna alla home */}
