@@ -5,6 +5,7 @@ import { DegreeCourseEntity } from './degree-course.entity';
 import { DegreeCoursesRepository } from './degree-courses.repository';
 import { TeachersRepository } from '../teachers/teachers.repository';
 import { handleDatabaseError } from '../database-error.helper';
+import { nameKey, normalizeName } from '../name-normalize.helper';
 import { UpdateDegreeCourseDto } from './dto/update-degree-course.dto';
 import { CreateDegreeCourseDto } from './dto/create-degree-course.dto';
 import { DegreeCourseListItem } from './interfaces/degree-course-list-item.interface';
@@ -27,6 +28,19 @@ export class DegreeCoursesService {
             throw new ConflictException('Esiste già un corso di laurea con questo nome');
         }
         handleDatabaseError(error, fallback);
+    }
+
+    // Unicità case/spazi-insensitive del nome: il vincolo DB da solo non vede le
+    // differenze di sole maiuscole, quindi confrontiamo le chiavi normalizzate.
+    private async assertNameAvailable(name: string, excludeId?: number): Promise<void> {
+        const key = nameKey(name);
+        const all = await this.repository.findAll();
+        const clash = all.find(
+            (dc) => dc.degreeCourseId !== excludeId && nameKey(dc.name) === key,
+        );
+        if (clash) {
+            throw new ConflictException('Esiste già un corso di laurea con questo nome');
+        }
     }
 
     private toListItem(dc: DegreeCourseEntity): DegreeCourseListItem {
@@ -60,6 +74,8 @@ export class DegreeCoursesService {
     }
 
     async createOne(dto: CreateDegreeCourseDto): Promise<DegreeCourseListItem> {
+        dto.name = normalizeName(dto.name);
+        await this.assertNameAvailable(dto.name);
         try {
             return this.toListItem(await this.repository.createOne(dto));
         } catch (error) {
@@ -68,6 +84,10 @@ export class DegreeCoursesService {
     }
 
     async updateOne(degreeCourseId: number, dto: UpdateDegreeCourseDto): Promise<DegreeCourseListItem> {
+        if (dto.name !== undefined) {
+            dto.name = normalizeName(dto.name);
+            await this.assertNameAvailable(dto.name, degreeCourseId);
+        }
         try {
             const updated = await this.repository.updateOne(degreeCourseId, dto);
             if (!updated) throw new NotFoundException(`Corso di laurea con degreeCourseId ${degreeCourseId} non trovato`);

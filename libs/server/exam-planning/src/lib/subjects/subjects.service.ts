@@ -15,6 +15,7 @@ import { TeachersRepository } from '../teachers/teachers.repository';
 import { DegreeCourseEntity } from '../degree-courses/degree-course.entity';
 import { TeacherEntity } from '../teachers/teacher.entity';
 import { handleDatabaseError } from '../database-error.helper';
+import { nameKey, normalizeName } from '../name-normalize.helper';
 import { SubjectListItem } from './interfaces/subject-list-item.interface';
 
 
@@ -40,6 +41,25 @@ export class SubjectsService {
             );
         }
         handleDatabaseError(error, fallback);
+    }
+
+    // Unicità case/spazi-insensitive del nome ALL'INTERNO dello stesso corso di
+    // laurea (il vincolo DB non vede le sole differenze di maiuscole).
+    private async assertNameAvailable(
+        name: string,
+        degreeCourseId: number,
+        excludeId?: number,
+    ): Promise<void> {
+        const key = nameKey(name);
+        const siblings = await this.repository.findAllFiltered({ degreeCourseId });
+        const clash = siblings.find(
+            (s) => s.subjectId !== excludeId && nameKey(s.name) === key,
+        );
+        if (clash) {
+            throw new ConflictException(
+                'Esiste già un insegnamento con questo nome in questo corso di laurea',
+            );
+        }
     }
 
     // FK annidate {id, name}: l'id serve ai form, il name alla tabella.
@@ -112,8 +132,11 @@ export class SubjectsService {
         const teacher = await this.resolveTeacher(dto.teacherId);
         this.validateYear(dto.year, degreeCourse);
 
+        const name = normalizeName(dto.name);
+        await this.assertNameAvailable(name, degreeCourse.degreeCourseId);
+
         const payload: CreateSubjectPayload = {
-            name: dto.name,
+            name,
             year: dto.year,
             cfu: dto.cfu,
             degreeCourse,
@@ -131,7 +154,7 @@ export class SubjectsService {
           const existing = await this.getEntityById(subjectId);
 
           const payload: UpdateSubjectPayload = {};
-          if (dto.name !== undefined) payload.name = dto.name;
+          if (dto.name !== undefined) payload.name = normalizeName(dto.name);
           if (dto.cfu !== undefined) payload.cfu = dto.cfu;
           if (dto.year !== undefined) payload.year = dto.year;
           if (dto.degreeCourseId !== undefined) {
@@ -145,6 +168,14 @@ export class SubjectsService {
               const finalYear = payload.year ?? existing.year;
               const finalDegreeCourse = payload.degreeCourse ?? existing.degreeCourse;
               this.validateYear(finalYear, finalDegreeCourse);
+          }
+
+          // Se cambia nome o corso, ricontrolla l'unicità nel corso finale.
+          if (payload.name !== undefined || payload.degreeCourse !== undefined) {
+              const finalName = payload.name ?? existing.name;
+              const finalDegreeCourseId =
+                  payload.degreeCourse?.degreeCourseId ?? existing.degreeCourse.degreeCourseId;
+              await this.assertNameAvailable(finalName, finalDegreeCourseId, subjectId);
           }
 
           try {

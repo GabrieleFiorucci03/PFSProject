@@ -4,6 +4,7 @@ import { ExamSessionsRepository } from './exam-sessions.repository';
 import { ExamSessionEntity } from './exam-sessions.entity';
 import { CreateExamSessionDto } from './dto/create-exam-session.dto';
 import { handleDatabaseError } from '../database-error.helper';
+import { nameKey, normalizeName } from '../name-normalize.helper';
 import { UpdateExamSessionDto } from './dto/update-exam-session.dto';
 import { ExamSessionListItem } from './interfaces/exam-session-list-item.interface';
 
@@ -42,6 +43,19 @@ export class ExamSessionsService {
         handleDatabaseError(error, fallback);
     }
 
+    // Unicità case/spazi-insensitive del nome (il vincolo DB non vede le sole
+    // differenze di maiuscole): confronto sulle chiavi normalizzate.
+    private async assertNameAvailable(name: string, excludeId?: number): Promise<void> {
+        const key = nameKey(name);
+        const all = await this.repository.findAll();
+        const clash = all.find(
+            (s) => s.examSessionId !== excludeId && nameKey(s.name) === key,
+        );
+        if (clash) {
+            throw new ConflictException('Esiste già una sessione con questo nome');
+        }
+    }
+
     private async getEntityById(examSessionId: number): Promise<ExamSessionEntity> {
         const session = await this.repository.findById(examSessionId);
         if (!session) {
@@ -78,6 +92,8 @@ export class ExamSessionsService {
 
     async createOne(dto: CreateExamSessionDto): Promise<ExamSessionListItem> {
         this.validateDates(dto);
+        dto.name = normalizeName(dto.name);
+        await this.assertNameAvailable(dto.name);
         try {
             return this.toListItem(await this.repository.createOne(dto));
         } catch (error) {
@@ -93,6 +109,10 @@ export class ExamSessionsService {
             planningStartDate: dto.planningStartDate ?? this.toIso(session.planningStartDate),
             planningEndDate: dto.planningEndDate ?? this.toIso(session.planningEndDate),
         });
+        if (dto.name !== undefined) {
+            dto.name = normalizeName(dto.name);
+            await this.assertNameAvailable(dto.name, examSessionId);
+        }
         try {
             const updated = await this.repository.updateOne(examSessionId, dto);
             if (!updated) {
