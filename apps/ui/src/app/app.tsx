@@ -15,19 +15,9 @@ import { EditTeacherPage } from '../features/teachers/edit-teacher.page';
 import { SubjectsPage } from '../features/subjects/subjects.page';
 import { CreateSubjectPage } from '../features/subjects/create-subject.page';
 import { EditSubjectPage } from '../features/subjects/edit-subject.page';
-
-/**
- * Placeholder temporaneo per le rotte entità non ancora implementate.
- * Verrà sostituito dalle pagine vere nei blocchi I/J (una entità alla volta).
- */
-function Placeholder({ title }: { title: string }) {
-  return (
-    <div className="rounded-xl bg-white p-8 shadow">
-      <h1 className="text-xl font-semibold text-slate-800">{title}</h1>
-      <p className="mt-2 text-slate-500">Pagina in costruzione.</p>
-    </div>
-  );
-}
+import { ExamsPage } from '../features/exams/exams.page';
+import { CreateExamPage } from '../features/exams/create-exam.page';
+import { EditExamPage } from '../features/exams/edit-exam.page';
 
 export function App() {
   return (
@@ -46,7 +36,9 @@ export function App() {
           </ProtectedRoute>
         }
       >
-        <Route path="/exams" element={<Placeholder title="Esami" />} />
+        <Route path="/exams" element={<ExamsPage />} />
+        <Route path="/exams/new" element={<CreateExamPage />} />
+        <Route path="/exams/:id/edit" element={<EditExamPage />} />
         <Route path="/exam-sessions" element={<ExamSessionsPage />} />
         <Route path="/exam-sessions/new" element={<CreateExamSessionPage />} />
         <Route

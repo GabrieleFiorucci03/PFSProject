@@ -24,7 +24,8 @@ export class ExamsController {
     constructor(private readonly service: ExamsService) {}
 
     @Get()
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.SEGRETERIA)
     @ApiBearerAuth()
     findAll() {
         return this.service.findAll();
