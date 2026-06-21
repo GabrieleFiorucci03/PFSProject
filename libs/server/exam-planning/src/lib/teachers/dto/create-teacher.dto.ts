@@ -20,8 +20,8 @@ export class CreateTeacherDto {
     })
     @IsString()
     @IsNotEmpty()
-    @MinLength(8)
-    @Matches(/[A-Z]/, { message: 'Password must contain at least one uppercase letter' })
-    @Matches(/[?^!#@]/, { message: 'Password must contain at least one symbol among ? ^ ! # @' })
+    @MinLength(8, { message: 'La password deve contenere almeno 8 caratteri' })
+    @Matches(/[A-Z]/, { message: 'La password deve contenere almeno una lettera maiuscola' })
+    @Matches(/[?^!#@]/, { message: 'La password deve contenere almeno un simbolo tra ? ^ ! # @' })
     password: string;
 }
