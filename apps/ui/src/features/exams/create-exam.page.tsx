@@ -11,6 +11,11 @@ import { fetchExamSessions } from '../exam-sessions/exam-sessions.api';
 import { createExam } from './exams.api';
 import { EXAM_TYPE_LABELS, ROOM_TYPE_LABELS } from './exams.labels';
 
+/** Data odierna come stringa ISO 'YYYY-MM-DD', per confronti lessicografici. */
+function todayIso(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 /**
  * Form di creazione di un esame (solo DOCENTE).
  * La materia si sceglie tra le PROPRIE (/subjects/mine), la sessione tra tutte.
@@ -39,8 +44,15 @@ export function CreateExamPage() {
     fetchMySubjects()
       .then(setSubjects)
       .catch(() => setSubjects([]));
+    // Mostra solo le sessioni in cui ha ancora senso pianificare: quelle la cui
+    // finestra di pianificazione non è già chiusa (planningEndDate >= oggi).
+    // Tiene sia le sessioni pianificabili ora sia quelle future (finestra non
+    // ancora aperta) ed esclude le passate/chiuse, in linea col vincolo backend.
     fetchExamSessions()
-      .then(setSessions)
+      .then((all) => {
+        const today = todayIso();
+        setSessions(all.filter((s) => s.planningEndDate >= today));
+      })
       .catch(() => setSessions([]));
   }, []);
 

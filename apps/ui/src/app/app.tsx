@@ -18,6 +18,9 @@ import { EditSubjectPage } from '../features/subjects/edit-subject.page';
 import { ExamsPage } from '../features/exams/exams.page';
 import { CreateExamPage } from '../features/exams/create-exam.page';
 import { EditExamPage } from '../features/exams/edit-exam.page';
+import { SecretariatsPage } from '../features/secretariats/secretariats.page';
+import { CreateSecretariatPage } from '../features/secretariats/create-secretariat.page';
+import { EditSecretariatPage } from '../features/secretariats/edit-secretariat.page';
 
 export function App() {
   return (
@@ -57,6 +60,12 @@ export function App() {
         <Route path="/teachers" element={<TeachersPage />} />
         <Route path="/teachers/new" element={<CreateTeacherPage />} />
         <Route path="/teachers/:id/edit" element={<EditTeacherPage />} />
+        <Route path="/secretariats" element={<SecretariatsPage />} />
+        <Route path="/secretariats/new" element={<CreateSecretariatPage />} />
+        <Route
+          path="/secretariats/:id/edit"
+          element={<EditSecretariatPage />}
+        />
       </Route>
 
       {/* Qualsiasi altra rotta torna alla home */}

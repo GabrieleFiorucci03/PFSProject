@@ -17,6 +17,7 @@ const navItems = [
   { to: '/subjects', label: 'Insegnamenti' },
   { to: '/degree-courses', label: 'Corsi di laurea' },
   { to: '/teachers', label: 'Docenti', segreteriaOnly: true },
+  { to: '/secretariats', label: 'Segretari', segreteriaOnly: true },
 ];
 
 export function AppLayout() {
