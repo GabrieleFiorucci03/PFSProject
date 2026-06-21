@@ -12,6 +12,9 @@ import { EditExamSessionPage } from '../features/exam-sessions/edit-exam-session
 import { TeachersPage } from '../features/teachers/teachers.page';
 import { CreateTeacherPage } from '../features/teachers/create-teacher.page';
 import { EditTeacherPage } from '../features/teachers/edit-teacher.page';
+import { SubjectsPage } from '../features/subjects/subjects.page';
+import { CreateSubjectPage } from '../features/subjects/create-subject.page';
+import { EditSubjectPage } from '../features/subjects/edit-subject.page';
 
 /**
  * Placeholder temporaneo per le rotte entità non ancora implementate.
@@ -50,7 +53,9 @@ export function App() {
           path="/exam-sessions/:id/edit"
           element={<EditExamSessionPage />}
         />
-        <Route path="/subjects" element={<Placeholder title="Insegnamenti" />} />
+        <Route path="/subjects" element={<SubjectsPage />} />
+        <Route path="/subjects/new" element={<CreateSubjectPage />} />
+        <Route path="/subjects/:id/edit" element={<EditSubjectPage />} />
         <Route path="/degree-courses" element={<DegreeCoursesPage />} />
         <Route path="/degree-courses/new" element={<CreateDegreeCoursePage />} />
         <Route

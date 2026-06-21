@@ -25,7 +25,8 @@ export class SubjectsController {
     constructor(private readonly service: SubjectsService) {}
 
     @Get()
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.SEGRETERIA)
     @ApiBearerAuth()
     @ApiQuery({ name: 'degreeCourseId', required: false, type: Number })
     @ApiQuery({ name: 'teacherId', required: false, type: Number })

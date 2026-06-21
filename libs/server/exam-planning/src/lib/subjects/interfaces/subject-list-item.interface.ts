@@ -9,6 +9,7 @@ export interface SubjectListItem {
     degreeCourse: {
         id: number;
         name: string;
+        department: string;
     };
     teacher: {
         id: number;

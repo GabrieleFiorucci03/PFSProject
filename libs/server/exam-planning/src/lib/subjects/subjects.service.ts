@@ -36,6 +36,7 @@ export class SubjectsService {
             degreeCourse: {
                 id: subject.degreeCourse.degreeCourseId,
                 name: subject.degreeCourse.name,
+                department: subject.degreeCourse.department,
             },
             teacher: {
                 id: subject.teacher.teacherId,
