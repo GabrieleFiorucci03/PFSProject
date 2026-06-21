@@ -9,18 +9,25 @@ import { getCurrentUser } from '../auth/auth.api';
  */
 
 // Voci di navigazione: una per entità di dominio. L'ordine segue il blueprint
-// (Esami in testa = home), ma resta semplice da estendere/condizionare per ruolo.
+// (Esami in testa = home). `segreteriaOnly: true` = voce visibile solo alla
+// SEGRETERIA (es. "Docenti": il docente ha l'area personale, non la gestione).
 const navItems = [
   { to: '/exams', label: 'Esami' },
   { to: '/exam-sessions', label: 'Sessioni' },
   { to: '/subjects', label: 'Insegnamenti' },
   { to: '/degree-courses', label: 'Corsi di laurea' },
-  { to: '/teachers', label: 'Docenti' },
+  { to: '/teachers', label: 'Docenti', segreteriaOnly: true },
 ];
 
 export function AppLayout() {
   const user = getCurrentUser();
   const navigate = useNavigate();
+
+  // Le voci segreteriaOnly compaiono solo per la SEGRETERIA.
+  const isSegreteria = user?.role === 'SEGRETERIA';
+  const visibleNavItems = navItems.filter(
+    (item) => !item.segreteriaOnly || isSegreteria
+  );
 
   // Stato del popup di conferma logout: true = popup visibile.
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -41,7 +48,7 @@ export function AppLayout() {
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-3">
           <div className="flex flex-wrap items-center gap-2">
             <span className="mr-2 font-bold">Appelli</span>
-            {navItems.map((item) => (
+            {visibleNavItems.map((item) => (
               <NavLink key={item.to} to={item.to} className={linkClass}>
                 {item.label}
               </NavLink>
