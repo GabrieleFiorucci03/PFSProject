@@ -5,7 +5,8 @@
   "scripts": {
     "start:api": "nx serve api",
     "start:ui": "nx serve ui",
-    "dev": "nx run-many -t serve -p api ui"
+    "dev": "nx run-many -t serve -p api ui",
+    "seed": "nx build api && node apps/api/dist/seed.js"
   },
   "private": true,
   "devDependencies": {
