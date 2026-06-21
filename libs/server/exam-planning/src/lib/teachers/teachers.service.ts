@@ -1,4 +1,4 @@
-import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { ServerUsersService } from '@server/users';
 import { UserRole } from '@server/security';
 import type { AuthenticatedUser } from '@server/auth';
@@ -7,7 +7,7 @@ import { TeachersRepository } from './teachers.repository';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
 import { handleDatabaseError } from '../database-error.helper';
-import { nameKey, normalizeName } from '../name-normalize.helper';
+import { normalizeName } from '../name-normalize.helper';
 import { TeacherListItem } from './interfaces/teacher-list-item.interface';
 
 @Injectable()
@@ -16,19 +16,6 @@ export class TeachersService {
         private readonly repository: TeachersRepository,
         private readonly usersService: ServerUsersService,
     ) {}
-
-    // Unicità case/spazi-insensitive del nome del docente (vive su user.name,
-    // che non ha un vincolo UNIQUE sul DB): confronto sulle chiavi normalizzate.
-    private async assertNameAvailable(name: string, excludeId?: number): Promise<void> {
-        const key = nameKey(name);
-        const all = await this.repository.findAll();
-        const clash = all.find(
-            (t) => t.teacherId !== excludeId && nameKey(t.user.name) === key,
-        );
-        if (clash) {
-            throw new ConflictException('Esiste già un docente con questo nome');
-        }
-    }
 
     // name/email dallo User collegato; passwordHash NON viene mai esposta.
     private toListItem(teacher: TeacherEntity): TeacherListItem {
@@ -64,8 +51,9 @@ export class TeachersService {
     }
 
     async createOne(dto: CreateTeacherDto): Promise<TeacherListItem> {
+        // Il nome può ripetersi tra docenti: l'unicità è garantita dall'email
+        // (vincolo sugli utenti). Qui normalizziamo solo gli spazi del nome.
         dto.name = normalizeName(dto.name);
-        await this.assertNameAvailable(dto.name);
         const user = await this.usersService.create({
             ...dto,
             role: UserRole.DOCENTE,
@@ -99,7 +87,6 @@ export class TeachersService {
 
         if (dto.name !== undefined) {
             dto.name = normalizeName(dto.name);
-            await this.assertNameAvailable(dto.name, teacherId);
         }
 
         try {
