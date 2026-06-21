@@ -12,9 +12,9 @@ export class CreateUserDto {
 
     @IsString()
     @IsNotEmpty()
-    @MinLength(8)
-    @Matches(/[A-Z]/, { message: 'Password must contain at least one uppercase letter' })
-    @Matches(/[?^!#@]/, { message: 'Password must contain at least one symbol among ? ^ ! # @' })
+    @MinLength(8, { message: 'La password deve contenere almeno 8 caratteri' })
+    @Matches(/[A-Z]/, { message: 'La password deve contenere almeno una lettera maiuscola' })
+    @Matches(/[?^!#@]/, { message: 'La password deve contenere almeno un simbolo tra ? ^ ! # @' })
     // @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[?^!#@]).{8,}$/, {
     //    message:
     //        'Password troppo debole: min 8 caratteri, maiuscola, minuscola, numero e simbolo (? ^ ! # @)',

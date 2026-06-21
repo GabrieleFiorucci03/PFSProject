@@ -38,7 +38,7 @@ export class ServerUsersService {
             : null;
 
         if (existing) {
-            throw new ConflictException('Email already in use');
+            throw new ConflictException('Email già in uso');
         }
 
         const passwordHash = await bcrypt.hash(dto.password,10);
@@ -49,7 +49,7 @@ export class ServerUsersService {
         if (dto.email) {
             const existing = await this.usersRepository.findByEmail(dto.email);
             if (existing && existing.id !== id) {
-                throw new ConflictException('Email already in use');
+                throw new ConflictException('Email già in uso');
             }
         }
 
@@ -64,7 +64,7 @@ export class ServerUsersService {
             // pg unique_violation: email duplicata in una race concorrente
             // (il pre-check sopra non copre due update simultanei).
             if ((error as { code?: string })?.code === '23505') {
-                throw new ConflictException('Email already in use');
+                throw new ConflictException('Email già in uso');
             }
             throw error;
         }

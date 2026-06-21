@@ -58,6 +58,14 @@ export function SecretariatsPage() {
   if (error)
     return <p className="rounded-lg bg-red-50 px-4 py-3 text-red-700">{error}</p>;
 
+  // La propria riga sempre in cima: così l'utente vede subito le proprie info
+  // e le azioni self (modifica/elimina). Le altre mantengono l'ordine originale.
+  const sortedItems = [...items].sort((a, b) => {
+    const aSelf = a.email === user?.email ? 0 : 1;
+    const bSelf = b.email === user?.email ? 0 : 1;
+    return aSelf - bSelf;
+  });
+
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
@@ -86,7 +94,7 @@ export function SecretariatsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {items.map((secretariat) => {
+              {sortedItems.map((secretariat) => {
                 const isSelf = secretariat.email === user?.email;
                 return (
                   <tr key={secretariat.id} className="hover:bg-slate-50">

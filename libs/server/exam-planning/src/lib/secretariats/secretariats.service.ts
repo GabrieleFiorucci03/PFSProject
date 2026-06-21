@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { ServerUsersService } from '@server/users';
 import { UserRole } from '@server/security';
 import type { AuthenticatedUser } from '@server/auth';
@@ -7,6 +7,7 @@ import { SecretariatsRepository } from './secretariats.repository';
 import { CreateSecretariatDto } from './dto/create-secretariat.dto';
 import { UpdateSecretariatDto } from './dto/update-secretariat.dto';
 import { handleDatabaseError } from '../database-error.helper';
+import { nameKey, normalizeName } from '../name-normalize.helper';
 import { SecretariatListItem } from './interfaces/secretariat-list-item.interface';
 
 @Injectable()
@@ -15,6 +16,19 @@ export class SecretariatsService {
         private readonly repository: SecretariatsRepository,
         private readonly usersService: ServerUsersService,
     ) {}
+
+    // Unicità case/spazi-insensitive del nome del segretario (vive su user.name,
+    // che non ha un vincolo UNIQUE sul DB): confronto sulle chiavi normalizzate.
+    private async assertNameAvailable(name: string, excludeId?: number): Promise<void> {
+        const key = nameKey(name);
+        const all = await this.repository.findAll();
+        const clash = all.find(
+            (s) => s.secretariatId !== excludeId && nameKey(s.user.name) === key,
+        );
+        if (clash) {
+            throw new ConflictException('Esiste già un segretario con questo nome');
+        }
+    }
 
     // name/email dallo User collegato; passwordHash NON viene mai esposta.
     private toListItem(secretariat: SecretariatEntity): SecretariatListItem {
@@ -47,6 +61,8 @@ export class SecretariatsService {
     }
 
     async createOne(dto: CreateSecretariatDto): Promise<SecretariatListItem> {
+        dto.name = normalizeName(dto.name);
+        await this.assertNameAvailable(dto.name);
         const user = await this.usersService.create({
             ...dto,
             role: UserRole.SEGRETERIA,
@@ -73,6 +89,10 @@ export class SecretariatsService {
         }
         if (dto.email !== undefined) {
             throw new ForbiddenException('Non puoi modificare la tua email');
+        }
+        if (dto.name !== undefined) {
+            dto.name = normalizeName(dto.name);
+            await this.assertNameAvailable(dto.name, secretariatId);
         }
         try {
             await this.usersService.update(secretariat.user.id, dto);
