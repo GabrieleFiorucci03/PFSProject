@@ -4,7 +4,7 @@ import { TeacherEntity } from '../teachers/teacher.entity';
 import type { ExamEntity } from '../exams/exam.entity';
 
 @Entity('subjects')
-@Unique(['name', 'year', 'degreeCourse'])
+@Unique(['name', 'degreeCourse'])
 export class SubjectEntity {
     @PrimaryGeneratedColumn({name: 'id'})
     subjectId: number;

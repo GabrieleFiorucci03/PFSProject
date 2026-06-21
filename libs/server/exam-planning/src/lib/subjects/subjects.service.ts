@@ -1,4 +1,5 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { QueryFailedError } from 'typeorm';
 import type { AuthenticatedUser } from '@server/auth';
 import { SubjectEntity } from './subject.entity';
 import {
@@ -25,6 +26,21 @@ export class SubjectsService {
         private readonly teacherRepository: TeachersRepository,
         private readonly degreeCourseRepository: DegreeCoursesRepository,
     ) {}
+
+    // Vincolo UNIQUE(name, degreeCourse) sul DB: un 23505 in scrittura significa
+    // sempre "nome già usato in quel corso". Lo traduciamo in un messaggio chiaro;
+    // ogni altro errore va all'helper generico.
+    private handleWriteError(error: unknown, fallback: string): never {
+        if (
+            error instanceof QueryFailedError &&
+            (error.driverError as { code?: string }).code === '23505'
+        ) {
+            throw new ConflictException(
+                'Esiste già un insegnamento con questo nome in questo corso di laurea',
+            );
+        }
+        handleDatabaseError(error, fallback);
+    }
 
     // FK annidate {id, name}: l'id serve ai form, il name alla tabella.
     private toListItem(subject: SubjectEntity): SubjectListItem {
@@ -107,7 +123,7 @@ export class SubjectsService {
         try {
             return this.toListItem(await this.repository.createOne(payload));
         } catch (error) {
-            handleDatabaseError(error, 'Errore durante la creazione della materia');
+            this.handleWriteError(error, 'Errore durante la creazione della materia');
         }
     }
 
@@ -139,7 +155,7 @@ export class SubjectsService {
               return this.toListItem(updated);
           } catch (error) {
               if (error instanceof NotFoundException) throw error;
-              handleDatabaseError(error, "Errore durante l'aggiornamento della materia");
+              this.handleWriteError(error, "Errore durante l'aggiornamento della materia");
           }
     }
 
