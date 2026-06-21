@@ -1,4 +1,5 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { QueryFailedError } from 'typeorm';
 import { ExamSessionsRepository } from './exam-sessions.repository';
 import { ExamSessionEntity } from './exam-sessions.entity';
 import { CreateExamSessionDto } from './dto/create-exam-session.dto';
@@ -26,6 +27,19 @@ export class ExamSessionsService {
             planningStartDate: this.toIso(session.planningStartDate),
             planningEndDate: this.toIso(session.planningEndDate),
         };
+    }
+
+    // Il nome della sessione ha un vincolo UNIQUE sul DB: un 23505 in scrittura
+    // significa sempre "nome già usato". Lo traduciamo in un messaggio chiaro;
+    // ogni altro errore va all'helper generico.
+    private handleWriteError(error: unknown, fallback: string): never {
+        if (
+            error instanceof QueryFailedError &&
+            (error.driverError as { code?: string }).code === '23505'
+        ) {
+            throw new ConflictException('Esiste già una sessione con questo nome');
+        }
+        handleDatabaseError(error, fallback);
     }
 
     private async getEntityById(examSessionId: number): Promise<ExamSessionEntity> {
@@ -67,7 +81,7 @@ export class ExamSessionsService {
         try {
             return this.toListItem(await this.repository.createOne(dto));
         } catch (error) {
-            handleDatabaseError(error, 'Errore durante la creazione della sessione');
+            this.handleWriteError(error, 'Errore durante la creazione della sessione');
         }
     }
 
@@ -87,7 +101,7 @@ export class ExamSessionsService {
             return this.toListItem(updated);
         } catch (error) {
             if (error instanceof NotFoundException) throw error;
-            handleDatabaseError(error, "Errore durante l'aggiornamento della sessione");
+            this.handleWriteError(error, "Errore durante l'aggiornamento della sessione");
         }
     }
 
