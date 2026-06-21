@@ -6,6 +6,9 @@ import { AppLayout } from '../features/layouts/app-layout';
 import { DegreeCoursesPage } from '../features/degree-courses/degree-courses.page';
 import { CreateDegreeCoursePage } from '../features/degree-courses/create-degree-course.page';
 import { EditDegreeCoursePage } from '../features/degree-courses/edit-degree-course.page';
+import { ExamSessionsPage } from '../features/exam-sessions/exam-sessions.page';
+import { CreateExamSessionPage } from '../features/exam-sessions/create-exam-session.page';
+import { EditExamSessionPage } from '../features/exam-sessions/edit-exam-session.page';
 
 /**
  * Placeholder temporaneo per le rotte entità non ancora implementate.
@@ -38,9 +41,11 @@ export function App() {
         }
       >
         <Route path="/exams" element={<Placeholder title="Esami" />} />
+        <Route path="/exam-sessions" element={<ExamSessionsPage />} />
+        <Route path="/exam-sessions/new" element={<CreateExamSessionPage />} />
         <Route
-          path="/exam-sessions"
-          element={<Placeholder title="Sessioni d'esame" />}
+          path="/exam-sessions/:id/edit"
+          element={<EditExamSessionPage />}
         />
         <Route path="/subjects" element={<Placeholder title="Insegnamenti" />} />
         <Route path="/degree-courses" element={<DegreeCoursesPage />} />
