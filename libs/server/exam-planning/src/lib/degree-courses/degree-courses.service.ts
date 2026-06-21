@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { QueryFailedError } from 'typeorm';
 import type { AuthenticatedUser } from '@server/auth';
 import { DegreeCourseEntity } from './degree-course.entity';
 import { DegreeCoursesRepository } from './degree-courses.repository';
@@ -14,6 +15,19 @@ export class DegreeCoursesService {
         private readonly repository: DegreeCoursesRepository,
         private readonly teacherRepository: TeachersRepository,
     ) {}
+
+    // Il nome del corso ha un vincolo UNIQUE sul DB: un 23505 in scrittura
+    // significa sempre "nome già usato". Lo traduciamo in un messaggio chiaro;
+    // ogni altro errore va all'helper generico.
+    private handleWriteError(error: unknown, fallback: string): never {
+        if (
+            error instanceof QueryFailedError &&
+            (error.driverError as { code?: string }).code === '23505'
+        ) {
+            throw new ConflictException('Esiste già un corso di laurea con questo nome');
+        }
+        handleDatabaseError(error, fallback);
+    }
 
     private toListItem(dc: DegreeCourseEntity): DegreeCourseListItem {
         return {
@@ -49,7 +63,7 @@ export class DegreeCoursesService {
         try {
             return this.toListItem(await this.repository.createOne(dto));
         } catch (error) {
-            handleDatabaseError(error, 'Errore durante la creazione del corso di laurea');
+            this.handleWriteError(error, 'Errore durante la creazione del corso di laurea');
         }
     }
 
@@ -60,7 +74,7 @@ export class DegreeCoursesService {
             return this.toListItem(updated);
         } catch (error) {
             if (error instanceof NotFoundException) throw error;
-            handleDatabaseError(error, "Errore durante l'aggiornamento del corso di laurea");
+            this.handleWriteError(error, "Errore durante l'aggiornamento del corso di laurea");
         }
     }
 
