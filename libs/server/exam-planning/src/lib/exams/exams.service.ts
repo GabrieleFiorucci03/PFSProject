@@ -274,6 +274,17 @@ export class ExamsService {
                 `Esiste già un altro esame il ${date} per il ${subject.year}° anno del corso "${subject.degreeCourse.name}"`,
             );
         }
+
+        const sameSubjectInSession = await this.repository.findBySubjectAndSession(
+            subject.subjectId,
+            examSession.examSessionId,
+            excludeExamId,
+        );
+        if (sameSubjectInSession) {
+            throw new ConflictException(
+                `Esiste già un appello per "${subject.name}" nella sessione "${examSession.name}"`,
+            );
+        }
     }
 
     // Robusto sia se la colonna 'date' arriva come Date sia come stringa 'YYYY-MM-DD'.

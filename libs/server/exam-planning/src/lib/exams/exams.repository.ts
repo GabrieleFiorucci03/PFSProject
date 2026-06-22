@@ -62,6 +62,21 @@ export class ExamsRepository {
         return this.repository.findOne({ where });
     }
 
+    findBySubjectAndSession(
+        subjectId: number,
+        examSessionId: number,
+        excludeExamId?: number,
+    ): Promise<ExamEntity | null> {
+        const where: Record<string, unknown> = {
+            subject: { subjectId },
+            examSession: { examSessionId },
+        };
+        if (excludeExamId !== undefined) {
+            where['examId'] = Not(excludeExamId);
+        }
+        return this.repository.findOne({ where });
+    }
+
     async createOne(payload: CreateExamPayload): Promise<ExamEntity> {
         const exam = this.repository.create(payload);
         return this.repository.save(exam);
