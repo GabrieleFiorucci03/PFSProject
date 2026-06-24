@@ -46,7 +46,7 @@ export class TeachersService {
     async findById(teacherId: number, currentUser: AuthenticatedUser): Promise<TeacherListItem> {
         const teacher = await this.repository.findById(teacherId);
         if (!teacher) {
-            throw new NotFoundException(`Docente con teacherId ${teacherId} non trovato`);
+            throw new NotFoundException(`Docente con id ${teacherId} non trovato`);
         }
         if (currentUser.role === UserRole.DOCENTE && teacher.user.id !== currentUser.id) {
             throw new ForbiddenException('Puoi accedere solo al tuo profilo');
@@ -77,7 +77,7 @@ export class TeachersService {
     ): Promise<TeacherListItem> {
         const teacher = await this.repository.findById(teacherId);
         if (!teacher) {
-            throw new NotFoundException(`Docente con teacherId ${teacherId} non trovato`);
+            throw new NotFoundException(`Docente con id ${teacherId} non trovato`);
         }
 
         if (currentUser.role === UserRole.DOCENTE) {
@@ -97,7 +97,7 @@ export class TeachersService {
             await this.usersService.update(teacher.user.id, dto);
             const updated = await this.repository.findById(teacherId);
             if (!updated) {
-                throw new NotFoundException(`Docente con teacherId ${teacherId} non trovato`);
+                throw new NotFoundException(`Docente con id ${teacherId} non trovato`);
             }
             return this.toListItem(updated);
         } catch (error) {
@@ -110,7 +110,7 @@ export class TeachersService {
     async deleteOne(teacherId: number, currentUser: AuthenticatedUser): Promise<void> {
         const teacher = await this.repository.findById(teacherId);
         if (!teacher) {
-            throw new NotFoundException(`Docente con teacherId ${teacherId} non trovato`);
+            throw new NotFoundException(`Docente con id ${teacherId} non trovato`);
         }
         // Un docente può eliminare solo il proprio account (self-only); la
         // segreteria può eliminare qualsiasi docente.

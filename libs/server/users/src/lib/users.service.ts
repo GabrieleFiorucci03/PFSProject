@@ -22,7 +22,7 @@ export class ServerUsersService {
     async getOneUser(id: number): Promise<UserEntity> {
         const user = await this.usersRepository.findById(id);
 
-        if(!user) throw new NotFoundException(`User with id ${id} not found`);
+        if(!user) throw new NotFoundException(`Utente con id ${id} non trovato`);
 
         return user;
     }
@@ -63,7 +63,7 @@ export class ServerUsersService {
         try {
             const updated = await this.usersRepository.updateOne(id, dto, passwordHash);
             if (!updated) {
-                throw new NotFoundException(`User with id ${id} not found`);
+                throw new NotFoundException(`Utente con id ${id} non trovato`);
             }
             return updated;
         } catch (error) {
@@ -80,7 +80,7 @@ export class ServerUsersService {
     async removeUser(id: number): Promise<void> {
         const deleted = await this.usersRepository.deleteOne(id);
         if (!deleted) {
-            throw new NotFoundException(`User with id ${id} not found`);
+            throw new NotFoundException(`Utente con id ${id} non trovato`);
         }
     }
 }

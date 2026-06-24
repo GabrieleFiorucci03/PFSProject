@@ -4,7 +4,7 @@ import 'dotenv/config';
 
 function requireEnv(name: string): string {
   const v = process.env[name];
-  if (!v) throw new Error(`Missing required env var: ${name}`);
+  if (!v) throw new Error(`Variabile d'ambiente obbligatoria mancante: ${name}`);
   return v;
 }
 

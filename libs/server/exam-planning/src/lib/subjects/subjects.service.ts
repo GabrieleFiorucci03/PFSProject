@@ -85,24 +85,24 @@ export class SubjectsService {
 
     private async getEntityById(subjectId: number): Promise<SubjectEntity> {
         const subject = await this.repository.findById(subjectId);
-        if(!subject) throw new NotFoundException(`Materia con subjectId ${subjectId} non trovata`);
+        if(!subject) throw new NotFoundException(`Materia con id ${subjectId} non trovata`);
         return subject;
     }
 
     private async resolveDegreeCourse(degreeCourseId: number): Promise<DegreeCourseEntity> {
         const degreeCourse = await this.degreeCourseRepository.findById(degreeCourseId);
-        if(!degreeCourse) throw new NotFoundException(`Corso di laurea con degreeCourseId ${degreeCourseId} non trovato`);
+        if(!degreeCourse) throw new NotFoundException(`Corso di laurea con id ${degreeCourseId} non trovato`);
         return degreeCourse;
     }
 
     private async resolveTeacher(teacherId: number): Promise<TeacherEntity> {
         const teacher = await this.teacherRepository.findById(teacherId);
-        if(!teacher) throw new NotFoundException(`Insegnante con teacherId ${teacherId} non trovato`);
+        if(!teacher) throw new NotFoundException(`Insegnante con id ${teacherId} non trovato`);
         return teacher;
     }
 
     private validateYear(year: number, degreeCourse: DegreeCourseEntity): void {
-        if(year < 1 || year > degreeCourse.yearsDuration) throw new BadRequestException( `L'anno deve essere compreso tra 1 e ${degreeCourse.yearsDuration} per il corso "${degreeCourse.name}"`,);
+        if(year < 1 || year > degreeCourse.yearsDuration) throw new BadRequestException( `L'anno di corso deve essere compreso tra 1 e ${degreeCourse.yearsDuration} per il corso "${degreeCourse.name}"`,);
     }
 
     async findAll(filters: SubjectFilters = {}): Promise<SubjectListItem[]> {
@@ -183,7 +183,7 @@ export class SubjectsService {
           try {
               const updated = await this.repository.updateOne(subjectId, payload);
               if (!updated) {
-                  throw new NotFoundException(`Materia con subjectId ${subjectId} non trovata`);
+                  throw new NotFoundException(`Materia con id ${subjectId} non trovata`);
               }
               return this.toListItem(updated);
           } catch (error) {
@@ -204,7 +204,7 @@ export class SubjectsService {
          try {
               const deleted = await this.repository.deleteOne(subjectId);
               if (!deleted) {
-                  throw new NotFoundException(`Materia con subjectId ${subjectId} non trovata`);
+                  throw new NotFoundException(`Materia con id ${subjectId} non trovata`);
               }
           } catch (error) {
               if (error instanceof NotFoundException) throw error;

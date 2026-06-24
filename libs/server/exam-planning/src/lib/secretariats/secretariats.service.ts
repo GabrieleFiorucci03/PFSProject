@@ -42,7 +42,7 @@ export class SecretariatsService {
     async findById(secretariatId: number): Promise<SecretariatListItem> {
         const secretariat = await this.repository.findById(secretariatId);
         if (!secretariat) {
-            throw new NotFoundException(`Segretario con secretariatId ${secretariatId} non trovato`);
+            throw new NotFoundException(`Segretario con id ${secretariatId} non trovato`);
         }
         return this.toListItem(secretariat);
     }
@@ -70,7 +70,7 @@ export class SecretariatsService {
     ): Promise<SecretariatListItem> {
         const secretariat = await this.repository.findById(secretariatId);
         if (!secretariat) {
-            throw new NotFoundException(`Segretario con secretariatId ${secretariatId} non trovato`);
+            throw new NotFoundException(`Segretario con id ${secretariatId} non trovato`);
         }
         if (secretariat.user.id !== currentUser.id) {
             throw new ForbiddenException('Puoi modificare solo il tuo profilo');
@@ -85,7 +85,7 @@ export class SecretariatsService {
             await this.usersService.update(secretariat.user.id, dto);
             const updated = await this.repository.findById(secretariatId);
             if (!updated) {
-                throw new NotFoundException(`Segretario con secretariatId ${secretariatId} non trovato`);
+                throw new NotFoundException(`Segretario con id ${secretariatId} non trovato`);
             }
             return this.toListItem(updated);
         } catch (error) {
@@ -98,7 +98,7 @@ export class SecretariatsService {
     async deleteOne(secretariatId: number, currentUser: AuthenticatedUser): Promise<void> {
         const secretariat = await this.repository.findById(secretariatId);
         if (!secretariat) {
-            throw new NotFoundException(`Segretario con secretariatId ${secretariatId} non trovato`);
+            throw new NotFoundException(`Segretario con id ${secretariatId} non trovato`);
         }
         // Self-only: un segretario può eliminare solo il proprio account.
         if (secretariat.user.id !== currentUser.id) {

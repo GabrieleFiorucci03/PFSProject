@@ -83,7 +83,7 @@ export class ExamSessionsService {
     private async getEntityById(examSessionId: number): Promise<ExamSessionEntity> {
         const session = await this.repository.findById(examSessionId);
         if (!session) {
-            throw new NotFoundException(`Sessione con examSessionId ${examSessionId} non trovata`);
+            throw new NotFoundException(`Sessione con id ${examSessionId} non trovata`);
         }
         return session;
     }
@@ -143,7 +143,7 @@ export class ExamSessionsService {
         try {
             const updated = await this.repository.updateOne(examSessionId, dto);
             if (!updated) {
-                throw new NotFoundException(`Sessione con examSessionId ${examSessionId} non trovata`);
+                throw new NotFoundException(`Sessione con id ${examSessionId} non trovata`);
             }
             return this.toListItem(updated);
         } catch (error) {
@@ -164,7 +164,7 @@ export class ExamSessionsService {
         try {
             const deleted = await this.repository.deleteOne(examSessionId);
             if (!deleted) {
-                throw new NotFoundException(`Sessione con examSessionId ${examSessionId} non trovata`);
+                throw new NotFoundException(`Sessione con id ${examSessionId} non trovata`);
             }
         } catch (error) {
             if (error instanceof NotFoundException) throw error;

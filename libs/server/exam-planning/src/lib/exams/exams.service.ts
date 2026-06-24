@@ -56,7 +56,7 @@ export class ExamsService {
     private async getEntityById(examId: number): Promise<ExamEntity> {
         const exam = await this.repository.findById(examId);
         if (!exam) {
-            throw new NotFoundException(`Esame con examId ${examId} non trovato`);
+            throw new NotFoundException(`Esame con id ${examId} non trovato`);
         }
         return exam;
     }
@@ -82,7 +82,7 @@ export class ExamsService {
     async findByTeacher(teacherId: number): Promise<ExamListItem[]> {
         const teacher = await this.teachersRepository.findById(teacherId);
         if (!teacher) {
-            throw new NotFoundException(`Docente con teacherId ${teacherId} non trovato`);
+            throw new NotFoundException(`Docente con id ${teacherId} non trovato`);
         }
         const exams = await this.repository.findByTeacher(teacherId);
         return exams.map((exam) => this.toListItem(exam));
@@ -169,7 +169,7 @@ export class ExamsService {
         try {
             const updated = await this.repository.updateOne(examId, payload);
             if (!updated) {
-                throw new NotFoundException(`Esame con examId ${examId} non trovato`);
+                throw new NotFoundException(`Esame con id ${examId} non trovato`);
             }
             return this.toListItem(updated);
         } catch (error) {
@@ -189,7 +189,7 @@ export class ExamsService {
         try {
             const deleted = await this.repository.deleteOne(examId);
             if (!deleted) {
-                throw new NotFoundException(`Esame con examId ${examId} non trovato`);
+                throw new NotFoundException(`Esame con id ${examId} non trovato`);
             }
         } catch (error) {
             if (error instanceof NotFoundException) throw error;
@@ -209,7 +209,7 @@ export class ExamsService {
     private async resolveSubject(subjectId: number): Promise<SubjectEntity> {
         const subject = await this.subjectsRepository.findById(subjectId);
         if (!subject) {
-            throw new NotFoundException(`Materia con subjectId ${subjectId} non trovata`);
+            throw new NotFoundException(`Materia con id ${subjectId} non trovata`);
         }
         return subject;
     }
@@ -217,7 +217,7 @@ export class ExamsService {
     private async resolveExamSession(examSessionId: number): Promise<ExamSessionEntity> {
         const examSession = await this.examSessionsRepository.findById(examSessionId);
         if (!examSession) {
-            throw new NotFoundException(`Sessione con examSessionId ${examSessionId} non trovata`);
+            throw new NotFoundException(`Sessione con id ${examSessionId} non trovata`);
         }
         return examSession;
     }
@@ -242,7 +242,7 @@ export class ExamsService {
         const { date, startHour, endHour, subject, examSession, currentUser, excludeExamId } = args;
 
         if (startHour >= endHour) {
-            throw new BadRequestException('startHour deve essere minore di endHour');
+            throw new BadRequestException("L'ora di inizio esame deve essere precedente all'ora di fine esame");
         }
 
         const sessionStart = this.toIso(examSession.startDate);

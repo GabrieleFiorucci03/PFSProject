@@ -61,7 +61,7 @@ export class DegreeCoursesService {
 
     async findById(degreeCourseId: number): Promise<DegreeCourseListItem> {
         const degreeCourse = await this.repository.findById(degreeCourseId);
-        if (!degreeCourse) throw new NotFoundException(`Corso di laurea con degreeCourseId ${degreeCourseId} non trovato`);
+        if (!degreeCourse) throw new NotFoundException(`Corso di laurea con id ${degreeCourseId} non trovato`);
         return this.toListItem(degreeCourse);
     }
 
@@ -92,7 +92,7 @@ export class DegreeCoursesService {
         }
         try {
             const updated = await this.repository.updateOne(degreeCourseId, dto);
-            if (!updated) throw new NotFoundException(`Corso di laurea con degreeCourseId ${degreeCourseId} non trovato`);
+            if (!updated) throw new NotFoundException(`Corso di laurea con id ${degreeCourseId} non trovato`);
             return this.toListItem(updated);
         } catch (error) {
             if (error instanceof NotFoundException) throw error;
@@ -112,7 +112,7 @@ export class DegreeCoursesService {
         }
         try {
             const deleted = await this.repository.deleteOne(degreeCourseId);
-            if (!deleted) throw new NotFoundException(`Corso di laurea con degreeCourseId ${degreeCourseId} non trovato`);
+            if (!deleted) throw new NotFoundException(`Corso di laurea con id ${degreeCourseId} non trovato`);
         } catch (error) {
             if (error instanceof NotFoundException) throw error;
             handleDatabaseError(error, "Errore durante l'eliminazione del corso di laurea");

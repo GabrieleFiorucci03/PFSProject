@@ -2,16 +2,16 @@ import { IsEmail, IsEnum, IsNotEmpty, IsString, Matches, MinLength } from "class
 import { UserRole } from '@server/security';
 
 export class CreateUserDto {
-    @IsString()
-    @IsNotEmpty()
+    @IsString({ message: 'Il nome deve essere una stringa di testo' })
+    @IsNotEmpty({ message: 'Il nome è obbligatorio' })
     name: string;
 
-    @IsEmail()
-    @IsNotEmpty()
+    @IsEmail({}, { message: "L'indirizzo email non è valido" })
+    @IsNotEmpty({ message: "L'indirizzo email è obbligatorio" })
     email: string;
 
-    @IsString()
-    @IsNotEmpty()
+    @IsString({ message: 'La password deve essere una stringa di testo' })
+    @IsNotEmpty({ message: 'La password è obbligatoria' })
     @MinLength(8, { message: 'La password deve contenere almeno 8 caratteri' })
     @Matches(/[A-Z]/, { message: 'La password deve contenere almeno una lettera maiuscola' })
     @Matches(/[?^!#@]/, { message: 'La password deve contenere almeno un simbolo tra ? ^ ! # @' })
