@@ -45,6 +45,16 @@ export class SubjectsRepository {
         return this.repository.findOne({ where: { subjectId } });
     }
 
+    countByDegreeCourse(degreeCourseId: number): Promise<number> {
+        return this.repository.count({
+            where: { degreeCourse: { degreeCourseId } },
+        });
+    }
+
+    countByTeacher(teacherId: number): Promise<number> {
+        return this.repository.count({ where: { teacher: { teacherId } } });
+    }
+
     async createOne(payload: CreateSubjectPayload): Promise<SubjectEntity> {
         const subject = this.repository.create(payload);
         return this.repository.save(subject);

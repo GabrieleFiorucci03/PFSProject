@@ -4,6 +4,7 @@ import type { AuthenticatedUser } from '@server/auth';
 import { DegreeCourseEntity } from './degree-course.entity';
 import { DegreeCoursesRepository } from './degree-courses.repository';
 import { TeachersRepository } from '../teachers/teachers.repository';
+import { SubjectsRepository } from '../subjects/subjects.repository';
 import { handleDatabaseError } from '../database-error.helper';
 import { nameKey, normalizeName } from '../name-normalize.helper';
 import { UpdateDegreeCourseDto } from './dto/update-degree-course.dto';
@@ -15,6 +16,7 @@ export class DegreeCoursesService {
     constructor(
         private readonly repository: DegreeCoursesRepository,
         private readonly teacherRepository: TeachersRepository,
+        private readonly subjectsRepository: SubjectsRepository,
     ) {}
 
     // Il nome del corso ha un vincolo UNIQUE sul DB: un 23505 in scrittura
@@ -99,6 +101,15 @@ export class DegreeCoursesService {
     }
 
     async deleteOne(degreeCourseId: number): Promise<void> {
+        // Un corso con insegnamenti collegati non è eliminabile (FK RESTRICT sul
+        // DB): controlliamo prima per restituire un 409 con un messaggio chiaro
+        // invece del 400 generico da violazione di foreign key.
+        const linkedSubjects = await this.subjectsRepository.countByDegreeCourse(degreeCourseId);
+        if (linkedSubjects > 0) {
+            throw new ConflictException(
+                `Impossibile eliminare il corso di laurea: ha ${linkedSubjects} insegnament${linkedSubjects === 1 ? 'o' : 'i'} collegat${linkedSubjects === 1 ? 'o' : 'i'}. Elimina o riassegna prima gli insegnamenti.`,
+            );
+        }
         try {
             const deleted = await this.repository.deleteOne(degreeCourseId);
             if (!deleted) throw new NotFoundException(`Corso di laurea con degreeCourseId ${degreeCourseId} non trovato`);

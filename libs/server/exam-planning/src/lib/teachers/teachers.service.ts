@@ -1,9 +1,11 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { ServerUsersService } from '@server/users';
 import { UserRole } from '@server/security';
 import type { AuthenticatedUser } from '@server/auth';
 import { TeacherEntity } from './teacher.entity';
 import { TeachersRepository } from './teachers.repository';
+import { SubjectsRepository } from '../subjects/subjects.repository';
+import { ExamsRepository } from '../exams/exams.repository';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
 import { handleDatabaseError } from '../database-error.helper';
@@ -15,6 +17,8 @@ export class TeachersService {
     constructor(
         private readonly repository: TeachersRepository,
         private readonly usersService: ServerUsersService,
+        private readonly subjectsRepository: SubjectsRepository,
+        private readonly examsRepository: ExamsRepository,
     ) {}
 
     // name/email dallo User collegato; passwordHash NON viene mai esposta.
@@ -113,6 +117,25 @@ export class TeachersService {
         if (currentUser.role === UserRole.DOCENTE && teacher.user.id !== currentUser.id) {
             throw new ForbiddenException('Puoi eliminare solo il tuo profilo');
         }
+
+        // Un docente con insegnamenti o appelli collegati non è eliminabile (FK
+        // RESTRICT su subjects/exams): controllo proattivo per un 409 chiaro
+        // invece del 400 generico da violazione di foreign key.
+        const linkedSubjects = await this.subjectsRepository.countByTeacher(teacherId);
+        const linkedExams = await this.examsRepository.countByTeacher(teacherId);
+        if (linkedSubjects > 0 || linkedExams > 0) {
+            const parts: string[] = [];
+            if (linkedSubjects > 0) {
+                parts.push(`${linkedSubjects} insegnament${linkedSubjects === 1 ? 'o' : 'i'}`);
+            }
+            if (linkedExams > 0) {
+                parts.push(`${linkedExams} appell${linkedExams === 1 ? 'o' : 'i'}`);
+            }
+            throw new ConflictException(
+                `Impossibile eliminare il docente: ha ${parts.join(' e ')} collegat${linkedSubjects + linkedExams === 1 ? 'o' : 'i'}. Riassegna o elimina prima questi elementi.`,
+            );
+        }
+
         try {
             await this.usersService.removeUser(teacher.user.id);
         } catch (error) {

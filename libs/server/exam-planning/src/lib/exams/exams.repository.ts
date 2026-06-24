@@ -87,6 +87,18 @@ export class ExamsRepository {
         return this.repository.findOne({ where });
     }
 
+    countBySubject(subjectId: number): Promise<number> {
+        return this.repository.count({ where: { subject: { subjectId } } });
+    }
+
+    countByTeacher(teacherId: number): Promise<number> {
+        return this.repository.count({ where: { teacher: { teacherId } } });
+    }
+
+    countByExamSession(examSessionId: number): Promise<number> {
+        return this.repository.count({ where: { examSession: { examSessionId } } });
+    }
+
     async createOne(payload: CreateExamPayload): Promise<ExamEntity> {
         const exam = this.repository.create(payload);
         return this.repository.save(exam);

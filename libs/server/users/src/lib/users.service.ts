@@ -45,7 +45,10 @@ export class ServerUsersService {
         return this.usersRepository.createOne(dto,passwordHash);
     }
 
-    async update(id: number, dto: UpdateUserDto): Promise<UserEntity> {
+    // Il dto può includere una nuova `password` (profili docente/segreteria): la
+    // ri-hashiamo qui, così il repository riceve sempre l'hash e mai la password
+    // in chiaro. UpdateUserDto omette `password`, quindi la tipizziamo a parte.
+    async update(id: number, dto: UpdateUserDto & { password?: string }): Promise<UserEntity> {
         if (dto.email) {
             const existing = await this.usersRepository.findByEmail(dto.email);
             if (existing && existing.id !== id) {
@@ -53,8 +56,12 @@ export class ServerUsersService {
             }
         }
 
+        const passwordHash = dto.password
+            ? await bcrypt.hash(dto.password, 10)
+            : undefined;
+
         try {
-            const updated = await this.usersRepository.updateOne(id, dto);
+            const updated = await this.usersRepository.updateOne(id, dto, passwordHash);
             if (!updated) {
                 throw new NotFoundException(`User with id ${id} not found`);
             }

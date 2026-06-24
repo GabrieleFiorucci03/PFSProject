@@ -1,6 +1,7 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { QueryFailedError } from 'typeorm';
 import { ExamSessionsRepository } from './exam-sessions.repository';
+import { ExamsRepository } from '../exams/exams.repository';
 import { ExamSessionEntity } from './exam-sessions.entity';
 import { CreateExamSessionDto } from './dto/create-exam-session.dto';
 import { handleDatabaseError } from '../database-error.helper';
@@ -12,6 +13,7 @@ import { ExamSessionListItem } from './interfaces/exam-session-list-item.interfa
 export class ExamSessionsService {
     constructor(
         private readonly repository: ExamSessionsRepository,
+        private readonly examsRepository: ExamsRepository,
     ) {}
 
     // Robusto sia se la colonna 'date' arriva come Date sia come stringa 'YYYY-MM-DD'.
@@ -126,6 +128,14 @@ export class ExamSessionsService {
     }
 
     async deleteOne(examSessionId: number): Promise<void> {
+        // Una sessione con appelli pianificati non è eliminabile (FK RESTRICT):
+        // controlliamo prima per dare un 409 chiaro invece del 400 generico.
+        const linkedExams = await this.examsRepository.countByExamSession(examSessionId);
+        if (linkedExams > 0) {
+            throw new ConflictException(
+                `Impossibile eliminare la sessione: ha ${linkedExams} appell${linkedExams === 1 ? 'o' : 'i'} collegat${linkedExams === 1 ? 'o' : 'i'}. Elimina prima gli appelli della sessione.`,
+            );
+        }
         try {
             const deleted = await this.repository.deleteOne(examSessionId);
             if (!deleted) {

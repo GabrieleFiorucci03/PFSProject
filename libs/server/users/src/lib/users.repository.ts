@@ -40,13 +40,14 @@ export class UsersRepository {
         return this.repository.find({order: {id: 'ASC'}});
     }
 
-    async updateOne(id: number, dto: UpdateUserDto): Promise<UserEntity|null> {
+    async updateOne(id: number, dto: UpdateUserDto, passwordHash?: string): Promise<UserEntity|null> {
         const user = await this.findById(id);
         if(!user)
             return null;
         if (dto.name !== undefined) user.name = dto.name;
         if (dto.email !== undefined) user.email = dto.email;
         if (dto.role !== undefined) user.role = dto.role;
+        if (passwordHash !== undefined) user.passwordHash = passwordHash;
 
         return this.repository.save(user);
     }

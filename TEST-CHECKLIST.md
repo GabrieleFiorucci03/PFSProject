@@ -62,7 +62,7 @@
 - [ ] Creazione con **nome duplicato esatto** ("Ingegneria Informatica") → 409
 - [ ] Creazione con nome che differisce solo per **maiuscole/spazi** ("ingegneria informatica", "Ingegneria  Informatica") → 409 (unicità case/spazi-insensitive)
 - [ ] Modifica nome di un corso in uno già esistente → 409
-- [ ] **Eliminazione di un corso con materie collegate** (es. Informatica) → deve essere **bloccata** (FK RESTRICT → 400). Verifica che NON cancelli a cascata le materie.
+- [ ] **Eliminazione di un corso con materie collegate** (es. Informatica) → **bloccata con 409** e messaggio chiaro ("Impossibile eliminare il corso di laurea: ha N insegnamenti collegati…"). Verifica che NON cancelli a cascata le materie.
 - [ ] Eliminazione di un corso **senza** materie → ok
 
 ---
@@ -77,7 +77,7 @@
 - [ ] DOCENTE tenta di modificare la propria **email** → 403 ("Non puoi modificare la tua email")
 - [ ] DOCENTE tenta di modificare/eliminare **un altro docente** → 403
 - [ ] SEGRETERIA modifica/elimina **qualunque** docente → ok
-- [ ] **Eliminazione di un docente che possiede materie** (es. Devis) → deve essere **bloccata** (FK RESTRICT). Verifica che non rimuova materie/esami a cascata.
+- [ ] **Eliminazione di un docente che possiede materie/esami** (es. Devis) → **bloccata con 409** e messaggio chiaro ("Impossibile eliminare il docente: ha N insegnamenti e M appelli collegati…"). Verifica che non rimuova materie/esami/utente a cascata.
 
 ---
 
@@ -101,7 +101,7 @@
 - [ ] Stesso nome materia ma in **un altro corso** → ammesso (unicità è per coppia nome+corso)
 - [ ] DOCENTE chiama `/subjects/mine` → vede **solo** le proprie materie
 - [ ] DOCENTE chiama `GET /subjects` (lista completa) → 403
-- [ ] **Eliminazione materia con esami collegati** → bloccata (FK RESTRICT → 400)
+- [ ] **Eliminazione materia con esami collegati** → **bloccata con 409** e messaggio chiaro ("Impossibile eliminare l'insegnamento: ha N appelli collegati…")
 
 ---
 
@@ -114,6 +114,8 @@
 - [ ] **planningEndDate > startDate** (la pianificazione finisce dopo l'inizio sessione) → 400
 - [ ] Caso limite valido: `planningEndDate == startDate` → ok
 - [ ] Modifica parziale (solo una data) che rende l'insieme incoerente → 400 (la validazione usa i valori esistenti per i campi non passati)
+- [ ] **Eliminazione di una sessione con appelli collegati** → **bloccata con 409** e messaggio chiaro ("Impossibile eliminare la sessione: ha N appelli collegati…")
+- [ ] Eliminazione di una sessione **senza** appelli → ok
 
 ---
 
@@ -186,7 +188,7 @@ Punti da decidere se sono voluti o vanno cambiati:
 2. **Nessun controllo di sovrapposizione di aula/orario.** `roomType` è un *tipo* di aula, non un'aula specifica: due esami di corsi diversi nello stesso giorno e fascia oraria con lo stesso `roomType` sono ammessi. Se serve evitare il doppio uso fisico di un'aula, manca una regola.
 3. **`startHour`/`endHour` interi 0–24 senza vincoli reali.** È possibile un esame 0–24 (intera giornata) o 7–8. Valutare un intervallo orario sensato (es. 8–20) e durata minima/massima.
 4. **DOCENTE bloccato sui propri esami a finestra chiusa.** Dopo la chiusura della pianificazione, il docente non può più modificare/eliminare i **propri** esami (solo la SEGRETERIA può). Confermare se è voluto o se il docente dovrebbe poter correggere fino all'inizio sessione.
-5. **Eliminazioni a cascata utente↔profilo.** Eliminando un docente si elimina lo `User` collegato (CASCADE); le materie con FK RESTRICT dovrebbero bloccare l'operazione → verificare che il messaggio d'errore sia chiaro (oggi è un 400 generico da FK).
+5. ✅ **Eliminazioni bloccate da relazioni — messaggi chiari (FATTO).** Corso/Docente/Insegnamento/Sessione con elementi collegati ora restituiscono un **409 con messaggio dedicato** (controllo proattivo nei service), invece del vecchio 400 generico da violazione FK.
 6. **Utenti "orfani" via `/auth/register` e `/users`.** Restano endpoint che creano un User senza profilo. Anche se non usati dal frontend, valutare se rimuoverli o documentarli per evitare account incoerenti.
 7. **Self-only tra segreterie.** Una SEGRETERIA non può modificare/eliminare un'altra segreteria. Se la segreteria è "admin", forse dovrebbe poter gestire anche gli altri account di segreteria — da decidere.
 

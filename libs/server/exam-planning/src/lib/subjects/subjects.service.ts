@@ -12,6 +12,7 @@ import { CreateSubjectDto } from './dto/create-subject.dto';
 import { UpdateSubjectDto } from './dto/update-subject.dto';
 import { DegreeCoursesRepository } from '../degree-courses/degree-courses.repository';
 import { TeachersRepository } from '../teachers/teachers.repository';
+import { ExamsRepository } from '../exams/exams.repository';
 import { DegreeCourseEntity } from '../degree-courses/degree-course.entity';
 import { TeacherEntity } from '../teachers/teacher.entity';
 import { handleDatabaseError } from '../database-error.helper';
@@ -26,6 +27,7 @@ export class SubjectsService {
         private readonly repository: SubjectsRepository,
         private readonly teacherRepository: TeachersRepository,
         private readonly degreeCourseRepository: DegreeCoursesRepository,
+        private readonly examsRepository: ExamsRepository,
     ) {}
 
     // Vincolo UNIQUE(name, degreeCourse) sul DB: un 23505 in scrittura significa
@@ -191,6 +193,14 @@ export class SubjectsService {
     }
 
     async deleteOne(subjectId: number): Promise<void> {
+         // Un insegnamento con appelli pianificati non è eliminabile (FK RESTRICT):
+         // controllo proattivo per un 409 chiaro invece del 400 generico.
+         const linkedExams = await this.examsRepository.countBySubject(subjectId);
+         if (linkedExams > 0) {
+             throw new ConflictException(
+                 `Impossibile eliminare l'insegnamento: ha ${linkedExams} appell${linkedExams === 1 ? 'o' : 'i'} collegat${linkedExams === 1 ? 'o' : 'i'}. Elimina prima gli appelli dell'insegnamento.`,
+             );
+         }
          try {
               const deleted = await this.repository.deleteOne(subjectId);
               if (!deleted) {
