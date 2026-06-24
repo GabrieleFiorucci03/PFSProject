@@ -135,6 +135,10 @@ export class ExamsService {
             throw new ForbiddenException('Puoi modificare solo i tuoi esami');
         }
 
+        if (currentUser.role === UserRole.DOCENTE && this.isPastExam(existing)) {
+            throw new ForbiddenException('Non puoi modificare un esame già passato');
+        }
+
         const subject = dto.subjectId !== undefined
             ? await this.resolveSubject(dto.subjectId)
             : existing.subject;
@@ -184,6 +188,10 @@ export class ExamsService {
 
         if (currentUser.role === UserRole.DOCENTE && exam.teacher.user.id !== currentUser.id) {
             throw new ForbiddenException('Puoi eliminare solo i tuoi esami');
+        }
+
+        if (currentUser.role === UserRole.DOCENTE && this.isPastExam(exam)) {
+            throw new ForbiddenException('Non puoi eliminare un esame già passato');
         }
 
         try {
@@ -298,5 +306,11 @@ export class ExamsService {
     // Robusto sia se la colonna 'date' arriva come Date sia come stringa 'YYYY-MM-DD'.
     private toIso(date: Date | string): string {
         return typeof date === 'string' ? date.slice(0, 10) : date.toISOString().slice(0, 10);
+    }
+
+    // Un esame è "passato" se la sua data è precedente a oggi (confronto per
+    // sola data, ISO 'YYYY-MM-DD'): il DOCENTE non può più modificarlo/eliminarlo.
+    private isPastExam(exam: ExamEntity): boolean {
+        return this.toIso(exam.date) < this.toIso(new Date());
     }
 }

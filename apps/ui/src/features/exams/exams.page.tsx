@@ -12,6 +12,19 @@ function formatDate(iso: string): string {
   return `${d}/${m}/${y}`;
 }
 
+/** Oggi come stringa ISO 'YYYY-MM-DD' locale (per confronti lessicografici). */
+function todayIso(): string {
+  const n = new Date();
+  return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(
+    n.getDate()
+  ).padStart(2, '0')}`;
+}
+
+/** Un esame è "passato" se la sua data è precedente a oggi. */
+function isPast(iso: string): boolean {
+  return iso < todayIso();
+}
+
 type SessionGroup = {
   id: number;
   name: string;
@@ -181,22 +194,32 @@ export function ExamsPage() {
                           {ROOM_TYPE_LABELS[exam.roomType]}
                         </td>
                         <td className="px-4 py-3">
-                          <div className="flex justify-end gap-2">
-                            <button
-                              type="button"
-                              onClick={() => navigate(`/exams/${exam.id}/edit`)}
-                              className="rounded-md border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
-                            >
-                              Modifica
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDelete(exam)}
-                              className="rounded-md bg-red-600 px-3 py-1 text-xs font-medium text-white transition hover:bg-red-700"
-                            >
-                              Elimina
-                            </button>
-                          </div>
+                          {/* Il DOCENTE non può modificare/eliminare esami passati
+                              (vincolo backend); la SEGRETERIA invece sempre. */}
+                          {!isSegreteria && isPast(exam.date) ? (
+                            <div className="flex justify-end">
+                              <span className="text-xs italic text-slate-400">
+                                Esame concluso
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="flex justify-end gap-2">
+                              <button
+                                type="button"
+                                onClick={() => navigate(`/exams/${exam.id}/edit`)}
+                                className="rounded-md border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                              >
+                                Modifica
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDelete(exam)}
+                                className="rounded-md bg-red-600 px-3 py-1 text-xs font-medium text-white transition hover:bg-red-700"
+                              >
+                                Elimina
+                              </button>
+                            </div>
+                          )}
                         </td>
                       </tr>
                     ))}
