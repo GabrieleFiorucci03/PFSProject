@@ -75,6 +75,7 @@
 - [ ] DOCENTE apre la propria **area personale** (`/teachers/me`) → vede il proprio profilo
 - [ ] DOCENTE modifica il proprio **nome** → ok
 - [ ] DOCENTE tenta di modificare la propria **email** → 403 ("Non puoi modificare la tua email")
+- [ ] DOCENTE **cambia la propria password** → salvato; il **vecchio** login NON funziona più, il **nuovo** sì (verifica con logout/login). Password debole (no maiuscola/simbolo o < 8) → 400
 - [ ] DOCENTE tenta di modificare/eliminare **un altro docente** → 403
 - [ ] SEGRETERIA modifica/elimina **qualunque** docente → ok
 - [ ] **Eliminazione di un docente che possiede materie/esami** (es. Devis) → **bloccata con 409** e messaggio chiaro ("Impossibile eliminare il docente: ha N insegnamenti e M appelli collegati…"). Verifica che non rimuova materie/esami/utente a cascata.
@@ -86,6 +87,7 @@
 - [ ] SEGRETERIA crea una **seconda** segreteria (serve per i test seguenti) → ok
 - [ ] Segretario A modifica il proprio nome → ok
 - [ ] Segretario A tenta di modificare la propria email → 403
+- [ ] Segretario A **cambia la propria password** → salvato; vecchia password non valida più, nuova sì (logout/login). Password debole → 400
 - [ ] Segretario A tenta di modificare/eliminare **Segretario B** → 403 (self-only, anche tra segreterie!)
 - [ ] Segretario elimina **il proprio** account → ok
 
@@ -114,6 +116,8 @@
 - [ ] **planningEndDate > startDate** (la pianificazione finisce dopo l'inizio sessione) → 400
 - [ ] Caso limite valido: `planningEndDate == startDate` → ok
 - [ ] Modifica parziale (solo una data) che rende l'insieme incoerente → 400 (la validazione usa i valori esistenti per i campi non passati)
+- [ ] **Periodi-sessione non sovrapponibili**: creare/modificare una sessione il cui `[startDate, endDate]` si sovrappone a un'altra → **409** (col nome della sessione in conflitto)
+- [ ] **Finestre di pianificazione sovrapponibili**: una nuova sessione con periodo distinto ma finestra di pianificazione sovrapposta a un'altra → **ok** (consentito)
 - [ ] **Eliminazione di una sessione con appelli collegati** → **bloccata con 409** e messaggio chiaro ("Impossibile eliminare la sessione: ha N appelli collegati…")
 - [ ] Eliminazione di una sessione **senza** appelli → ok
 

@@ -30,6 +30,7 @@ const COLORS = {
   blocked: '#fecaca', // rosso-200 → bloccato
   planning: '#ede9fe', // viola-100 → finestra di pianificazione
   session: '#dbeafe', // azzurro-100 → sessione d'esame
+  planningRing: '#8b5cf6', // viola-500 → bordo "anche pianificazione" sovrapposto
 };
 
 function todayIso(): string {
@@ -132,6 +133,17 @@ function DocenteDashboard() {
     return blocked ? COLORS.blocked : COLORS.available;
   }
 
+  // Bordo viola sovrapposto: segnala che il giorno è ANCHE una finestra di
+  // pianificazione, anche quando lo sfondo è già un altro stato (sessione,
+  // verde, rosso). Evita che il colore di sfondo "nasconda" la pianificazione.
+  function dayRing(iso: string): string | undefined {
+    const bg = dayColor(iso);
+    if (bg && bg !== COLORS.planning && inAnyPlanningWindow(iso)) {
+      return COLORS.planningRing;
+    }
+    return undefined;
+  }
+
   function handleSelectDay(iso: string) {
     if (!selectedSubject || dayColor(iso) !== COLORS.available) return;
     const session = sessionForDate(iso);
@@ -151,10 +163,12 @@ function DocenteDashboard() {
         { color: COLORS.available, label: 'Puoi inserire un appello (clicca)' },
         { color: COLORS.blocked, label: 'Giorno di sessione non disponibile' },
         { color: COLORS.planning, label: 'Finestra di pianificazione' },
+        { color: COLORS.planningRing, label: "Sessione d'esame e finestra di pianificazione", ring: true },
       ]
     : [
         { color: COLORS.session, label: "Sessione d'esame" },
         { color: COLORS.planning, label: 'Finestra di pianificazione' },
+        { color: COLORS.planningRing, label: "Sessione d'esame e finestra di pianificazione", ring: true },
       ];
 
   const openPlanning = sessions.filter(
@@ -204,6 +218,7 @@ function DocenteDashboard() {
       <PlanningCalendar
         events={events}
         dayColor={dayColor}
+        dayRing={dayRing}
         onSelectDay={handleSelectDay}
         legend={legend}
       />
@@ -246,11 +261,20 @@ function SegreteriaDashboard() {
     return undefined;
   }
 
+  // Bordo viola sovrapposto: un giorno di sessione (sfondo blu) che è anche
+  // finestra di pianificazione di un'altra sessione. Senza l'anello il blu
+  // nasconderebbe la pianificazione.
+  function dayRing(iso: string): string | undefined {
+    if (sessionForDate(iso) && inAnyPlanningWindow(iso)) return COLORS.planningRing;
+    return undefined;
+  }
+
   const events = toEvents(exams, (e) => `${e.subject.name} — ${e.teacher.name}`);
 
   const legend = [
     { color: COLORS.planning, label: 'Finestra di pianificazione' },
     { color: COLORS.session, label: "Sessione d'esame" },
+    { color: COLORS.planningRing, label: "Sessione d'esame e finestra di pianificazione", ring: true },
   ];
 
   const dayExams = selectedDay
@@ -278,6 +302,7 @@ function SegreteriaDashboard() {
       <PlanningCalendar
         events={events}
         dayColor={dayColor}
+        dayRing={dayRing}
         onSelectDay={setSelectedDay}
         legend={legend}
       />

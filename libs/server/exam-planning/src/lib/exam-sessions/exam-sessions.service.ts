@@ -58,6 +58,28 @@ export class ExamSessionsService {
         }
     }
 
+    // I periodi-sessione [startDate, endDate] non possono sovrapporsi tra loro:
+    // così le sessioni hanno confini netti. Le finestre di pianificazione invece
+    // possono sovrapporsi (non sono controllate qui). Due intervalli [a,b] e
+    // [c,d] si sovrappongono se a <= d && c <= b (le date ISO si confrontano
+    // direttamente come stringhe).
+    private async assertNoSessionOverlap(
+        startDate: string,
+        endDate: string,
+        excludeId?: number,
+    ): Promise<void> {
+        const all = await this.repository.findAll();
+        const overlap = all.find((s) => {
+            if (s.examSessionId === excludeId) return false;
+            return startDate <= this.toIso(s.endDate) && this.toIso(s.startDate) <= endDate;
+        });
+        if (overlap) {
+            throw new ConflictException(
+                `Il periodo della sessione si sovrappone alla sessione "${overlap.name}" (${this.toIso(overlap.startDate)} → ${this.toIso(overlap.endDate)})`,
+            );
+        }
+    }
+
     private async getEntityById(examSessionId: number): Promise<ExamSessionEntity> {
         const session = await this.repository.findById(examSessionId);
         if (!session) {
@@ -94,6 +116,7 @@ export class ExamSessionsService {
 
     async createOne(dto: CreateExamSessionDto): Promise<ExamSessionListItem> {
         this.validateDates(dto);
+        await this.assertNoSessionOverlap(dto.startDate, dto.endDate);
         dto.name = normalizeName(dto.name);
         await this.assertNameAvailable(dto.name);
         try {
@@ -105,12 +128,14 @@ export class ExamSessionsService {
 
     async updateOne(examSessionId: number, dto: UpdateExamSessionDto): Promise<ExamSessionListItem> {
         const session = await this.getEntityById(examSessionId);
-        this.validateDates({
+        const merged = {
             startDate: dto.startDate ?? this.toIso(session.startDate),
             endDate: dto.endDate ?? this.toIso(session.endDate),
             planningStartDate: dto.planningStartDate ?? this.toIso(session.planningStartDate),
             planningEndDate: dto.planningEndDate ?? this.toIso(session.planningEndDate),
-        });
+        };
+        this.validateDates(merged);
+        await this.assertNoSessionOverlap(merged.startDate, merged.endDate, examSessionId);
         if (dto.name !== undefined) {
             dto.name = normalizeName(dto.name);
             await this.assertNameAvailable(dto.name, examSessionId);
