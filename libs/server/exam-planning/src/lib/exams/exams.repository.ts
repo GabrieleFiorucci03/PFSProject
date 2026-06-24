@@ -62,10 +62,11 @@ export class ExamsRepository {
         return this.repository.findOne({ where });
     }
 
-    // Tutte le date con un esame per un dato corso+anno (qualsiasi docente):
-    // serve al calendario del docente per colorare di rosso i giorni "occupati"
-    // dalla regola di conflitto (un solo esame per corso+anno+giorno).
-    findOccupiedDates(degreeCourseId: number, year: number): Promise<ExamEntity[]> {
+    // Tutti gli esami di un dato corso+anno (qualsiasi docente): serve al
+    // calendario del docente sia per colorare di rosso i giorni "occupati" dalla
+    // regola di conflitto (un solo esame per corso+anno+giorno), sia per mostrare
+    // QUALI esami occupano un giorno (anche se non sono del docente corrente).
+    findByCourseAndYear(degreeCourseId: number, year: number): Promise<ExamEntity[]> {
         return this.repository.find({
             where: { subject: { year, degreeCourse: { degreeCourseId } } },
             order: { date: 'ASC' },

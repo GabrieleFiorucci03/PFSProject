@@ -27,19 +27,20 @@ export async function fetchMyExams(): Promise<ExamListItem[]> {
 }
 
 /**
- * Date già occupate (ISO 'YYYY-MM-DD') per un corso+anno, su TUTTI i docenti
- * (uso DOCENTE). Il calendario le usa per colorare di rosso i giorni in conflitto
- * con la regola "un solo esame per corso+anno+giorno".
+ * Tutti gli esami di un corso+anno, su TUTTI i docenti (uso DOCENTE). Il
+ * calendario li usa per colorare di rosso i giorni in conflitto con la regola
+ * "un solo esame per corso+anno+giorno" e per mostrare QUALI esami occupano un
+ * giorno in cui il docente non può inserire il proprio (anche se non sono suoi).
  */
-export async function fetchOccupiedDates(
+export async function fetchCourseYearExams(
   degreeCourseId: number,
   year: number
-): Promise<string[]> {
+): Promise<ExamListItem[]> {
   const params = new URLSearchParams({
     degreeCourseId: String(degreeCourseId),
     year: String(year),
   });
-  const response = await fetch(`${RESOURCE}/occupied-dates?${params}`, {
+  const response = await fetch(`${RESOURCE}/by-course-year?${params}`, {
     headers: getAuthHeaders(),
   });
   if (!response.ok) await handleApiError(response);

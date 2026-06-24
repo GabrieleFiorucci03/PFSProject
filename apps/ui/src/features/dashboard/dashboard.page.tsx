@@ -8,7 +8,7 @@ import type {
 } from '@server/exam-planning';
 import { getCurrentUser } from '../auth/auth.api';
 import { fetchExamSessions } from '../exam-sessions/exam-sessions.api';
-import { fetchExams, fetchMyExams, fetchOccupiedDates } from '../exams/exams.api';
+import { fetchExams, fetchMyExams, fetchCourseYearExams } from '../exams/exams.api';
 import { fetchMySubjects } from '../subjects/subjects.api';
 import { PlanningCalendar, toIsoLocal } from '../calendar/planning-calendar';
 
@@ -53,6 +53,13 @@ function toEvents(exams: ExamListItem[], titleOf: (e: ExamListItem) => string): 
   }));
 }
 
+/** Rimuove esami duplicati per id (mantiene una sola occorrenza). */
+function dedupById(exams: ExamListItem[]): ExamListItem[] {
+  const byId = new Map<number, ExamListItem>();
+  for (const exam of exams) byId.set(exam.id, exam);
+  return [...byId.values()];
+}
+
 /** Card statistica riusabile. */
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
@@ -72,7 +79,10 @@ function DocenteDashboard() {
   const [sessions, setSessions] = useState<ExamSessionListItem[]>([]);
   const [myExams, setMyExams] = useState<ExamListItem[]>([]);
   const [selectedSubjectId, setSelectedSubjectId] = useState('');
-  const [occupiedDates, setOccupiedDates] = useState<string[]>([]);
+  // Esami del corso+anno della materia scelta (di qualsiasi docente): servono per
+  // i giorni rossi e per mostrare gli esami che occupano un giorno selezionato.
+  const [courseYearExams, setCourseYearExams] = useState<ExamListItem[]>([]);
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -92,18 +102,24 @@ function DocenteDashboard() {
   const selectedSubject =
     subjects.find((s) => String(s.id) === selectedSubjectId) ?? null;
 
-  // Date occupate (corso+anno) della materia scelta: servono per i giorni rossi.
+  // Esami del corso+anno della materia scelta: servono per i giorni rossi e per
+  // il riquadro di dettaglio. Dipende da selectedSubjectId (stabile) per non
+  // rifare la fetch a ogni render e per azzerare il giorno selezionato al cambio.
   useEffect(() => {
+    setSelectedDay(null);
     if (!selectedSubject) {
-      setOccupiedDates([]);
+      setCourseYearExams([]);
       return;
     }
-    fetchOccupiedDates(selectedSubject.degreeCourse.id, selectedSubject.year)
-      .then(setOccupiedDates)
-      .catch(() => setOccupiedDates([]));
-  }, [selectedSubject]);
+    fetchCourseYearExams(selectedSubject.degreeCourse.id, selectedSubject.year)
+      .then(setCourseYearExams)
+      .catch(() => setCourseYearExams([]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedSubjectId]);
 
   const today = todayIso();
+  // Giorni occupati da un esame del corso+anno (regola di conflitto).
+  const occupiedDates = courseYearExams.map((e) => e.date);
 
   const sessionForDate = (iso: string) =>
     sessions.find((s) => iso >= s.startDate && iso <= s.endDate) ?? null;
@@ -145,18 +161,39 @@ function DocenteDashboard() {
   }
 
   function handleSelectDay(iso: string) {
-    if (!selectedSubject || dayColor(iso) !== COLORS.available) return;
-    const session = sessionForDate(iso);
-    if (!session) return;
-    const params = new URLSearchParams({
-      subjectId: String(selectedSubject.id),
-      date: iso,
-      examSessionId: String(session.id),
-    });
-    navigate(`/exams/new?${params}`);
+    if (!selectedSubject) return;
+    // Giorno verde: vai al form di creazione precompilato.
+    if (dayColor(iso) === COLORS.available) {
+      const session = sessionForDate(iso);
+      if (!session) return;
+      const params = new URLSearchParams({
+        subjectId: String(selectedSubject.id),
+        date: iso,
+        examSessionId: String(session.id),
+      });
+      navigate(`/exams/new?${params}`);
+      return;
+    }
+    // Giorno non disponibile: mostra gli esami del corso+anno che lo occupano,
+    // così il docente capisce perché non può inserire (anche se non sono suoi).
+    setSelectedDay(iso);
   }
 
-  const events = toEvents(myExams, (e) => e.subject.name);
+  const myExamIds = new Set(myExams.map((e) => e.id));
+  // Eventi sul calendario: i propri appelli sono sempre mostrati; quando è
+  // selezionata una materia si aggiungono anche gli esami (di ALTRI docenti)
+  // dello stesso corso+anno che occupano i giorni, così si vede CHI blocca una
+  // data (non solo che è rossa). Gli esami altrui riportano il nome del docente.
+  const eventExams = selectedSubject
+    ? dedupById([...myExams, ...courseYearExams])
+    : myExams;
+  const events = toEvents(eventExams, (e) =>
+    myExamIds.has(e.id) ? e.subject.name : `${e.subject.name} — ${e.teacher.name}`
+  );
+  // Esami del corso+anno nel giorno selezionato (per il riquadro di dettaglio).
+  const dayExams = selectedDay
+    ? courseYearExams.filter((e) => e.date === selectedDay)
+    : [];
 
   const legend = selectedSubject
     ? [
@@ -210,7 +247,7 @@ function DocenteDashboard() {
         {selectedSubject && (
           <p className="text-xs text-slate-500">
             Clicca un giorno verde per creare un appello con data e sessione già
-            impostate.
+            impostate; clicca un giorno rosso per vedere quali esami lo occupano.
           </p>
         )}
       </div>
@@ -222,6 +259,48 @@ function DocenteDashboard() {
         onSelectDay={handleSelectDay}
         legend={legend}
       />
+
+      {selectedSubject && selectedDay && (
+        <div className="rounded-xl bg-white p-4 shadow">
+          <h2 className="mb-1 font-semibold text-slate-800">
+            Esami del {selectedDay}
+          </h2>
+          <p className="mb-3 text-sm text-slate-500">
+            {selectedSubject.degreeCourse.name} · {selectedSubject.year}° anno
+          </p>
+          {dayExams.length === 0 ? (
+            <p className="text-sm text-slate-500">
+              Nessun esame di questo corso e anno in questo giorno. Il giorno può
+              essere non disponibile per weekend o pianificazione chiusa.
+            </p>
+          ) : (
+            <>
+              <p className="mb-2 text-sm text-slate-600">
+                In questo giorno non puoi inserire un appello per il{' '}
+                {selectedSubject.year}° anno di {selectedSubject.degreeCourse.name}:
+                la giornata è già occupata da questi esami.
+              </p>
+              <ul className="divide-y divide-slate-100 text-sm">
+                {dayExams.map((exam) => (
+                  <li key={exam.id} className="flex justify-between py-2">
+                    <span className="text-slate-800">
+                      {exam.subject.name}
+                      {myExamIds.has(exam.id) && (
+                        <span className="ml-2 text-xs font-medium text-blue-600">
+                          (il tuo appello)
+                        </span>
+                      )}
+                    </span>
+                    <span className="text-slate-500">
+                      {exam.teacher.name} · {exam.startHour}:00–{exam.endHour}:00
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }
