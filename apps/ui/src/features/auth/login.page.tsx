@@ -4,7 +4,8 @@ import { login } from './auth.api';
 
 /**
  * Pagina di login: form controllato con email/password.
- * Al successo salva token+utente (in auth.api) e reindirizza alla home (/exams).
+ * Al successo salva token+utente (in auth.api) e reindirizza alla home (/),
+ * cioè la dashboard col calendario (uguale per docente e segreteria).
  * Gli errori vengono dal backend tramite handleApiError (messaggi in italiano).
  */
 export function LoginPage() {
@@ -23,7 +24,7 @@ export function LoginPage() {
 
     try {
       await login(email, password);
-      navigate('/exams', { replace: true });
+      navigate('/', { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Errore di accesso');
     } finally {

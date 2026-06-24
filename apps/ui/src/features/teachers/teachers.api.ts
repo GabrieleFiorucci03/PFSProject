@@ -17,6 +17,13 @@ export async function fetchTeachers(): Promise<TeacherListItem[]> {
   return response.json();
 }
 
+/** Il proprio profilo docente (per l'area personale). */
+export async function fetchMyTeacher(): Promise<TeacherListItem> {
+  const response = await fetch(`${RESOURCE}/me`, { headers: getAuthHeaders() });
+  if (!response.ok) await handleApiError(response);
+  return response.json();
+}
+
 /** Un singolo docente per id (usato per precompilare il form di modifica). */
 export async function fetchTeacherById(id: number): Promise<TeacherListItem> {
   const response = await fetch(`${RESOURCE}/${id}`, { headers: getAuthHeaders() });

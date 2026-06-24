@@ -103,10 +103,15 @@ export class TeachersService {
         }
     }
 
-    async deleteOne(teacherId: number): Promise<void> {
+    async deleteOne(teacherId: number, currentUser: AuthenticatedUser): Promise<void> {
         const teacher = await this.repository.findById(teacherId);
         if (!teacher) {
             throw new NotFoundException(`Docente con teacherId ${teacherId} non trovato`);
+        }
+        // Un docente può eliminare solo il proprio account (self-only); la
+        // segreteria può eliminare qualsiasi docente.
+        if (currentUser.role === UserRole.DOCENTE && teacher.user.id !== currentUser.id) {
+            throw new ForbiddenException('Puoi eliminare solo il tuo profilo');
         }
         try {
             await this.usersService.removeUser(teacher.user.id);

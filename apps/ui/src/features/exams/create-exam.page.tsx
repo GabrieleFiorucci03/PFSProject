@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import type {
   ExamType,
   RoomType,
@@ -25,10 +25,15 @@ function todayIso(): string {
  */
 export function CreateExamPage() {
   const navigate = useNavigate();
+  // Valori iniziali opzionali passati dal calendario (click su giorno verde):
+  // /exams/new?subjectId=&date=&examSessionId=. Se assenti, form vuoto.
+  const [searchParams] = useSearchParams();
 
-  const [subjectId, setSubjectId] = useState('');
-  const [examSessionId, setExamSessionId] = useState('');
-  const [date, setDate] = useState('');
+  const [subjectId, setSubjectId] = useState(searchParams.get('subjectId') ?? '');
+  const [examSessionId, setExamSessionId] = useState(
+    searchParams.get('examSessionId') ?? ''
+  );
+  const [date, setDate] = useState(searchParams.get('date') ?? '');
   const [startHour, setStartHour] = useState(9);
   const [endHour, setEndHour] = useState(11);
   const [type, setType] = useState<ExamType>('ORAL' as ExamType);

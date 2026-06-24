@@ -20,13 +20,13 @@ import { CreateExamPage } from '../features/exams/create-exam.page';
 import { EditExamPage } from '../features/exams/edit-exam.page';
 import { SecretariatsPage } from '../features/secretariats/secretariats.page';
 import { CreateSecretariatPage } from '../features/secretariats/create-secretariat.page';
-import { EditSecretariatPage } from '../features/secretariats/edit-secretariat.page';
+import { ProfilePage } from '../features/profile/profile.page';
+import { DashboardPage } from '../features/dashboard/dashboard.page';
 
 export function App() {
   return (
     <Routes>
       {/* Rotte pubbliche */}
-      <Route path="/" element={<Navigate to="/exams" replace />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/logout" element={<LogoutPage />} />
 
@@ -39,6 +39,8 @@ export function App() {
           </ProtectedRoute>
         }
       >
+        {/* Home = dashboard con calendario */}
+        <Route index element={<DashboardPage />} />
         <Route path="/exams" element={<ExamsPage />} />
         <Route path="/exams/new" element={<CreateExamPage />} />
         <Route path="/exams/:id/edit" element={<EditExamPage />} />
@@ -62,14 +64,13 @@ export function App() {
         <Route path="/teachers/:id/edit" element={<EditTeacherPage />} />
         <Route path="/secretariats" element={<SecretariatsPage />} />
         <Route path="/secretariats/new" element={<CreateSecretariatPage />} />
-        <Route
-          path="/secretariats/:id/edit"
-          element={<EditSecretariatPage />}
-        />
+        {/* Area personale (entrambi i ruoli): raggiungibile dal nome in navbar
+            e dal "Modifica" sulla propria riga in /secretariats. */}
+        <Route path="/me" element={<ProfilePage />} />
       </Route>
 
       {/* Qualsiasi altra rotta torna alla home */}
-      <Route path="*" element={<Navigate to="/exams" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

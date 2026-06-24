@@ -198,6 +198,14 @@ export class ExamsService {
         }
     }
 
+    // Date già occupate (ISO 'YYYY-MM-DD', senza duplicati) per un corso+anno:
+    // il calendario del docente le usa per i giorni rossi da conflitto. Espone
+    // solo le date, non i dettagli degli esami altrui.
+    async findOccupiedDates(degreeCourseId: number, year: number): Promise<string[]> {
+        const exams = await this.repository.findOccupiedDates(degreeCourseId, year);
+        return [...new Set(exams.map((exam) => this.toIso(exam.date)))];
+    }
+
     private async resolveSubject(subjectId: number): Promise<SubjectEntity> {
         const subject = await this.subjectsRepository.findById(subjectId);
         if (!subject) {

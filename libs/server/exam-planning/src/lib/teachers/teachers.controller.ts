@@ -72,10 +72,13 @@ export class TeachersController {
 
     @Delete(':teacherId')
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(UserRole.SEGRETERIA)
+    @Roles(UserRole.SEGRETERIA, UserRole.DOCENTE)
     @ApiBearerAuth()
     @HttpCode(HttpStatus.NO_CONTENT)
-    delete(@Param('teacherId', ParseIntPipe) teacherId: number) {
-        return this.service.deleteOne(teacherId);
+    delete(
+        @Param('teacherId', ParseIntPipe) teacherId: number,
+        @CurrentUser() currentUser: AuthenticatedUser,
+    ) {
+        return this.service.deleteOne(teacherId, currentUser);
     }
 }

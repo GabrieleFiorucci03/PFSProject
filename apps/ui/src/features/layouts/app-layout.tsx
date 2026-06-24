@@ -8,9 +8,10 @@ import { getCurrentUser } from '../auth/auth.api';
  * in app.tsx, così la navbar resta fissa mentre cambia solo il contenuto.
  */
 
-// Voci di navigazione: una per entità di dominio. L'ordine segue il blueprint
-// (Esami in testa = home). `segreteriaOnly: true` = voce visibile solo alla
-// SEGRETERIA (es. "Docenti": il docente ha l'area personale, non la gestione).
+// Voci di navigazione: una per entità di dominio. La home (logo "Appelli") punta
+// a "/" = dashboard col calendario, uguale per entrambi i ruoli.
+// `segreteriaOnly: true` = voce visibile solo alla SEGRETERIA (es. "Docenti": il
+// docente ha l'area personale, non la gestione).
 const navItems = [
   { to: '/exams', label: 'Esami' },
   { to: '/exam-sessions', label: 'Sessioni' },
@@ -48,7 +49,9 @@ export function AppLayout() {
       <nav className="bg-blue-800 text-white shadow">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="mr-2 font-bold">Appelli</span>
+            <NavLink to="/" className="mr-2 font-bold transition hover:text-blue-200">
+              Appelli
+            </NavLink>
             {visibleNavItems.map((item) => (
               <NavLink key={item.to} to={item.to} className={linkClass}>
                 {item.label}
@@ -58,12 +61,16 @@ export function AppLayout() {
 
           <div className="flex items-center gap-3 text-sm">
             {user && (
-              <span className="text-blue-100">
+              <NavLink
+                to="/me"
+                className="text-blue-100 transition hover:text-white"
+                title="Area personale"
+              >
                 {user.name}{' '}
                 <span className="rounded bg-blue-900 px-2 py-0.5 text-xs">
                   {user.role}
                 </span>
-              </span>
+              </NavLink>
             )}
             <button
               type="button"

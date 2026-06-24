@@ -9,6 +9,7 @@ import {
     ParseIntPipe,
     Patch,
     Post,
+    Query,
     UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -45,6 +46,17 @@ export class ExamsController {
     @ApiBearerAuth()
     findByTeacher(@Param('teacherId', ParseIntPipe) teacherId: number) {
         return this.service.findByTeacher(teacherId);
+    }
+
+    @Get('occupied-dates')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.DOCENTE)
+    @ApiBearerAuth()
+    findOccupiedDates(
+        @Query('degreeCourseId', ParseIntPipe) degreeCourseId: number,
+        @Query('year', ParseIntPipe) year: number,
+    ) {
+        return this.service.findOccupiedDates(degreeCourseId, year);
     }
 
     @Get(':examId')

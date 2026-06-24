@@ -114,9 +114,7 @@ export function SecretariatsPage() {
                         <div className="flex justify-end gap-2">
                           <button
                             type="button"
-                            onClick={() =>
-                              navigate(`/secretariats/${secretariat.id}/edit`)
-                            }
+                            onClick={() => navigate('/me')}
                             className="rounded-md border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
                           >
                             Modifica
