@@ -1,5 +1,6 @@
 import { ClassSerializerInterceptor, Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
+import type { Request, Response, NextFunction } from 'express';
 import { AppModule } from './app/app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import 'dotenv/config';
@@ -8,6 +9,14 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
+
+  // Le risposte API non devono mai essere messe in cache dal browser: senza
+  // questo header (con il solo ETag di Express) il browser può riusare una copia
+  // vecchia di una lista — es. mostrare una sessione già eliminata sul server.
+  app.use((_req: Request, res: Response, next: NextFunction) => {
+    res.setHeader('Cache-Control', 'no-store');
+    next();
+  });
 
   app.enableCors({
     origin: process.env.CORS_ORIGIN ?? 'http://localhost:4200',
