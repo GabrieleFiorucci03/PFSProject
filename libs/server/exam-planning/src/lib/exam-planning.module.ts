@@ -26,6 +26,12 @@ import { SecretariatsRepository } from './secretariats/secretariats.repository';
 import { SubjectsRepository } from './subjects/subjects.repository';
 import { ExamsRepository } from './exams/exams.repository';
 
+/**
+ * Modulo di dominio della pianificazione appelli. Registra tutte le entità del
+ * dominio (corsi di laurea, insegnamenti, sessioni, esami, docenti, segretari),
+ * i relativi controller, service e repository custom. Importa `ServerUsersModule`
+ * perché docenti e segretari creano/gestiscono l'utente sottostante.
+ */
 @Module({
   imports: [
     TypeOrmModule.forFeature([

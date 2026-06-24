@@ -20,6 +20,12 @@ import { TeacherEntity } from '../teachers/teacher.entity';
 import { handleDatabaseError } from '../database-error.helper';
 import { ExamListItem } from './interfaces/exam-list-item.interface';
 
+/**
+ * Logica di dominio degli appelli. Coordina più repository (esami, materie,
+ * sessioni, docenti), applica le regole (proprietà docente, finestra di
+ * pianificazione, niente weekend, conflitto corso+anno+giorno, niente modifiche
+ * agli esami passati) e restituisce sempre la forma "piatta" `ExamListItem`.
+ */
 @Injectable()
 export class ExamsService {
     constructor(
@@ -53,6 +59,7 @@ export class ExamsService {
         };
     }
 
+    /** Recupera l'ENTITÀ esame per id (uso interno); 404 se non esiste. */
     private async getEntityById(examId: number): Promise<ExamEntity> {
         const exam = await this.repository.findById(examId);
         if (!exam) {
@@ -61,15 +68,18 @@ export class ExamsService {
         return exam;
     }
 
+    /** Tutti gli appelli (uso SEGRETERIA), come list-item. */
     async findAll(): Promise<ExamListItem[]> {
         const exams = await this.repository.findAll();
         return exams.map((exam) => this.toListItem(exam));
     }
 
+    /** Un appello per id, come list-item; 404 se non esiste. */
     async findById(examId: number): Promise<ExamListItem> {
         return this.toListItem(await this.getEntityById(examId));
     }
 
+    /** Gli appelli del docente autenticato (uso /exams/mine). */
     async findOwnExams(currentUser: AuthenticatedUser): Promise<ExamListItem[]> {
         const teacher = await this.teachersRepository.findByUserId(currentUser.id);
         if (!teacher) {
@@ -79,6 +89,7 @@ export class ExamsService {
         return exams.map((exam) => this.toListItem(exam));
     }
 
+    /** Gli appelli di un docente specifico (uso SEGRETERIA); 404 se il docente non esiste. */
     async findByTeacher(teacherId: number): Promise<ExamListItem[]> {
         const teacher = await this.teachersRepository.findById(teacherId);
         if (!teacher) {
@@ -88,6 +99,11 @@ export class ExamsService {
         return exams.map((exam) => this.toListItem(exam));
     }
 
+    /**
+     * Crea un appello (solo DOCENTE). Risolve materia/sessione/docente, verifica
+     * che la materia sia del docente corrente, applica tutte le regole di dominio
+     * (`validateExam`) e salva. Il docente è forzato all'utente autenticato.
+     */
     async createOne(dto: CreateExamDto, currentUser: AuthenticatedUser): Promise<ExamListItem> {
         const subject = await this.resolveSubject(dto.subjectId);
         const examSession = await this.resolveExamSession(dto.examSessionId);
@@ -124,6 +140,11 @@ export class ExamsService {
         }
     }
 
+    /**
+     * Aggiorna un appello. La SEGRETERIA può modificare qualsiasi esame; il DOCENTE
+     * solo i propri, solo su proprie materie e solo se l'esame NON è già passato.
+     * Rivalida le regole di dominio sui valori risultanti (mix dto + valori esistenti).
+     */
     async updateOne(
         examId: number,
         dto: UpdateExamDto,
@@ -183,6 +204,10 @@ export class ExamsService {
         }
     }
 
+    /**
+     * Elimina un appello. La SEGRETERIA può eliminarne qualsiasi; il DOCENTE solo
+     * i propri e solo se l'esame NON è già passato.
+     */
     async deleteOne(examId: number, currentUser: AuthenticatedUser): Promise<void> {
         const exam = await this.getEntityById(examId);
 
@@ -215,6 +240,7 @@ export class ExamsService {
         return exams.map((exam) => this.toListItem(exam));
     }
 
+    /** Carica la materia o lancia 404. */
     private async resolveSubject(subjectId: number): Promise<SubjectEntity> {
         const subject = await this.subjectsRepository.findById(subjectId);
         if (!subject) {
@@ -223,6 +249,7 @@ export class ExamsService {
         return subject;
     }
 
+    /** Carica la sessione o lancia 404. */
     private async resolveExamSession(examSessionId: number): Promise<ExamSessionEntity> {
         const examSession = await this.examSessionsRepository.findById(examSessionId);
         if (!examSession) {
@@ -231,6 +258,7 @@ export class ExamsService {
         return examSession;
     }
 
+    /** Carica il profilo docente dell'utente autenticato o lancia 404. */
     private async resolveOwnTeacher(currentUser: AuthenticatedUser): Promise<TeacherEntity> {
         const teacher = await this.teachersRepository.findByUserId(currentUser.id);
         if (!teacher) {
@@ -239,6 +267,13 @@ export class ExamsService {
         return teacher;
     }
 
+    /**
+     * Applica TUTTE le regole di dominio di un appello (in creazione e modifica):
+     * ora inizio < ora fine; data dentro l'intervallo della sessione; per il DOCENTE
+     * "oggi" dentro la finestra di pianificazione; niente weekend; nessun conflitto
+     * corso+anno+giorno; niente stessa materia due volte nella stessa sessione.
+     * Lancia l'eccezione appropriata alla prima regola violata.
+     */
     private async validateExam(args: {
         date: string;
         startHour: number;

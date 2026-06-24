@@ -8,6 +8,7 @@ import { TeacherEntity } from '../teachers/teacher.entity';
 import { ExamType } from './dto/exam-type.enum';
 import { RoomType } from './dto/room-type.enum';
 
+/** Dati per creare un appello: le FK sono già entità risolte dal service. */
 export type CreateExamPayload = {
     date: Date;
     startHour: number;
@@ -19,8 +20,10 @@ export type CreateExamPayload = {
     teacher: TeacherEntity;
 };
 
+/** Dati per l'aggiornamento: stessi campi del create, tutti opzionali. */
 export type UpdateExamPayload = Partial<CreateExamPayload>;
 
+/** Repository CRUD + query di supporto per gli appelli (solo accesso ai dati). */
 @Injectable()
 export class ExamsRepository {
     constructor(
@@ -28,14 +31,17 @@ export class ExamsRepository {
         private readonly repository: Repository<ExamEntity>,
     ) {}
 
+    /** Tutti gli appelli, ordinati per id. */
     findAll(): Promise<ExamEntity[]> {
         return this.repository.find({ order: { examId: 'ASC' } });
     }
 
+    /** Un appello per id; `null` se non esiste. */
     findById(examId: number): Promise<ExamEntity | null> {
         return this.repository.findOne({ where: { examId } });
     }
 
+    /** Gli appelli di un docente, ordinati per data. */
     findByTeacher(teacherId: number): Promise<ExamEntity[]> {
         return this.repository.find({
             where: { teacher: { teacherId } },
@@ -43,6 +49,11 @@ export class ExamsRepository {
         });
     }
 
+    /**
+     * Cerca un esame in conflitto con la regola "un solo appello per corso+anno+giorno":
+     * stesso corso di laurea, stesso anno, stessa data. `excludeExamId` esclude l'esame
+     * che si sta modificando (così non va in conflitto con sé stesso). `null` se libero.
+     */
     findConflictingExam(
         degreeCourseId: number,
         year: number,
@@ -73,6 +84,11 @@ export class ExamsRepository {
         });
     }
 
+    /**
+     * Cerca un appello già esistente per la stessa materia nella stessa sessione
+     * (regola: una materia ha un solo appello per sessione). `excludeExamId` esclude
+     * l'esame in modifica. `null` se non esiste.
+     */
     findBySubjectAndSession(
         subjectId: number,
         examSessionId: number,
@@ -88,23 +104,28 @@ export class ExamsRepository {
         return this.repository.findOne({ where });
     }
 
+    /** Quanti appelli usano una materia (per bloccarne l'eliminazione se >0). */
     countBySubject(subjectId: number): Promise<number> {
         return this.repository.count({ where: { subject: { subjectId } } });
     }
 
+    /** Quanti appelli ha un docente (per bloccarne l'eliminazione se >0). */
     countByTeacher(teacherId: number): Promise<number> {
         return this.repository.count({ where: { teacher: { teacherId } } });
     }
 
+    /** Quanti appelli ci sono in una sessione (per bloccarne l'eliminazione se >0). */
     countByExamSession(examSessionId: number): Promise<number> {
         return this.repository.count({ where: { examSession: { examSessionId } } });
     }
 
+    /** Crea e salva un appello. */
     async createOne(payload: CreateExamPayload): Promise<ExamEntity> {
         const exam = this.repository.create(payload);
         return this.repository.save(exam);
     }
 
+    /** Aggiorna i campi forniti; ritorna l'entità aggiornata o `null` se l'id non esiste. */
     async updateOne(examId: number, payload: UpdateExamPayload): Promise<ExamEntity | null> {
         const exam = await this.findById(examId);
         if (!exam) return null;
@@ -119,6 +140,7 @@ export class ExamsRepository {
         return this.repository.save(exam);
     }
 
+    /** Elimina un appello per id; `true` se rimosso. */
     async deleteOne(examId: number): Promise<boolean> {
         const result = await this.repository.delete(examId);
         return (result.affected ?? 0) > 0;

@@ -8,6 +8,12 @@ import { ServerAuthService } from './auth.service';
 import { LocalStrategy } from './strategies/local.strategy';
 import 'dotenv/config';
 
+/**
+ * Modulo di autenticazione. Configura Passport e il JwtModule (firma dei token
+ * con `SECRET_KEY`, scadenza 24h), registra le due strategie (locale per il login
+ * con email/password, jwt per le rotte protette) ed espone `ServerAuthService`
+ * agli altri moduli. Importa `ServerUsersModule` per leggere/creare gli utenti.
+ */
 @Module({
   imports: [
     ServerUsersModule,

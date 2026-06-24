@@ -3,6 +3,11 @@ import { DegreeCourseEntity } from '../degree-courses/degree-course.entity';
 import { TeacherEntity } from '../teachers/teacher.entity';
 import type { ExamEntity } from '../exams/exam.entity';
 
+/**
+ * Entità insegnamento/materia (tabella `subjects`). Appartiene a un corso di laurea
+ * ed è tenuto da un docente. Il vincolo `@Unique(['name','degreeCourse'])` impedisce
+ * due insegnamenti con lo stesso nome nello stesso corso (a prescindere dall'anno).
+ */
 @Entity('subjects')
 @Unique(['name', 'degreeCourse'])
 export class SubjectEntity {

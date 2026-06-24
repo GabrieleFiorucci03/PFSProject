@@ -5,11 +5,13 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CurrentUser, JwtAuthGuard, Roles, RolesGuard, UserRole } from '@server/security';
 
+/** Controller CRUD utenti (prefisso /users). Quasi tutte le rotte sono SEGRETERIA-only. */
 @ApiTags('Users APIs')
 @Controller('users')
 export class ServerUsersController {
   constructor(private serverUsersService: ServerUsersService) {}
 
+    /** GET /users (o /users?role=...) — elenco utenti, SEGRETERIA-only. */
     @Get() // GET /users or /users?role=value
     @UseGuards(JwtAuthGuard,RolesGuard)
     @Roles(UserRole.SEGRETERIA)
@@ -19,6 +21,7 @@ export class ServerUsersController {
         return this.serverUsersService.getUsers(role);
     }
 
+    /** GET /users/me — restituisce il payload dell'utente autenticato ({id,name,email,role}). */
     @Get('me')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
@@ -26,6 +29,7 @@ export class ServerUsersController {
         return user;
     }
 
+    /** GET /users/:id — singolo utente (SEGRETERIA o DOCENTE). */
     @Get(':id') // GET /users/:id
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.SEGRETERIA,UserRole.DOCENTE)
@@ -34,6 +38,7 @@ export class ServerUsersController {
         return this.serverUsersService.getOneUser(id);
     }
 
+    /** POST /users — crea un utente "nudo" (SEGRETERIA-only). Onboarding reale via /teachers e /secretariats. */
     @Post() // POST /users
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.SEGRETERIA)
@@ -54,6 +59,7 @@ export class ServerUsersController {
         return this.serverUsersService.create(user);
     }
 
+    /** PATCH /users/:id — aggiorna name/email/role (SEGRETERIA-only). */
     @Patch(':id') // PATCH /users/:id
     @UseGuards(JwtAuthGuard,RolesGuard)
     @Roles(UserRole.SEGRETERIA)
@@ -75,6 +81,7 @@ export class ServerUsersController {
         return this.serverUsersService.update(id,userUpdate);
     }
 
+    /** DELETE /users/:id — elimina un utente (SEGRETERIA-only). */
     @Delete(':id') // DELETE /users/:id
     @UseGuards(JwtAuthGuard,RolesGuard)
     @Roles(UserRole.SEGRETERIA)

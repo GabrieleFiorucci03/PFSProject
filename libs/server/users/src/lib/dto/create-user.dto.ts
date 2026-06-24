@@ -1,6 +1,11 @@
 import { IsEmail, IsEnum, IsNotEmpty, IsString, Matches, MinLength } from "class-validator";
 import { UserRole } from '@server/security';
 
+/**
+ * Dati per creare un utente: nome, email, password (con regole di robustezza) e
+ * ruolo. Validato automaticamente dal `ValidationPipe` globale; i messaggi di
+ * errore sono in italiano.
+ */
 export class CreateUserDto {
     @IsString({ message: 'Il nome deve essere una stringa di testo' })
     @IsNotEmpty({ message: 'Il nome è obbligatorio' })

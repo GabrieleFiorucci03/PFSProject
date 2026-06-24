@@ -5,6 +5,11 @@ import { ExamType } from './dto/exam-type.enum';
 import { RoomType } from './dto/room-type.enum';
 import { ExamSessionEntity } from '../exam-sessions/exam-sessions.entity';
 
+/**
+ * Entità appello d'esame (tabella `exams`). Collega una materia, una sessione e
+ * il docente, in una certa data e fascia oraria. Il vincolo `@Unique(['date','subject'])`
+ * impedisce due appelli della stessa materia nello stesso giorno.
+ */
 @Entity('exams')
 @Unique(['date', 'subject'])
 export class ExamEntity {

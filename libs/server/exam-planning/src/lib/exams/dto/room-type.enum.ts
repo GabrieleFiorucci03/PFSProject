@@ -1,3 +1,7 @@
+/**
+ * Tipo di aula richiesto per un appello. È una CATEGORIA di aula (non un'aula
+ * fisica specifica): standard o laboratori specializzati.
+ */
 export enum RoomType {
     STANDARD = 'STANDARD',
     COMPUTER_LAB = 'COMPUTER_LAB',

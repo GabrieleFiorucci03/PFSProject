@@ -9,6 +9,11 @@ import { nameKey, normalizeName } from '../name-normalize.helper';
 import { UpdateExamSessionDto } from './dto/update-exam-session.dto';
 import { ExamSessionListItem } from './interfaces/exam-session-list-item.interface';
 
+/**
+ * Logica di dominio delle sessioni d'esame (gestite dalla SEGRETERIA). Valida la
+ * coerenza delle date, l'unicità del nome (case/spazi-insensitive) e la non
+ * sovrapposizione dei periodi-sessione; impedisce di eliminare sessioni con appelli.
+ */
 @Injectable()
 export class ExamSessionsService {
     constructor(
@@ -21,6 +26,7 @@ export class ExamSessionsService {
         return typeof date === 'string' ? date.slice(0, 10) : date.toISOString().slice(0, 10);
     }
 
+    /** Converte l'entità nella forma "piatta" esposta al client (date come ISO). */
     private toListItem(session: ExamSessionEntity): ExamSessionListItem {
         return {
             id: session.examSessionId,
