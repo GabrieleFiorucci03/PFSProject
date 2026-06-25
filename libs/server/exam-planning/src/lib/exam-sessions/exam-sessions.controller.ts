@@ -5,6 +5,11 @@ import { JwtAuthGuard, Roles, RolesGuard, UserRole } from '@server/security';
 import { CreateExamSessionDto } from './dto/create-exam-session.dto';
 import { UpdateExamSessionDto } from './dto/update-exam-session.dto';
 
+/**
+ * Endpoint REST per le sessioni d'esame (`/api/exam-sessions`).
+ * La lettura è accessibile a qualsiasi utente autenticato; le scritture (POST,
+ * PATCH, DELETE) sono riservate alla SEGRETERIA.
+ */
 @ApiTags('Exam Sessions APIs')
 @Controller('exam-sessions')
 export class ExamSessionsController {

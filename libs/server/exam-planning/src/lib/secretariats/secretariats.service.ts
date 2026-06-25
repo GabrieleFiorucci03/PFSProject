@@ -10,6 +10,12 @@ import { handleDatabaseError } from '../database-error.helper';
 import { normalizeName } from '../name-normalize.helper';
 import { SecretariatListItem } from './interfaces/secretariat-list-item.interface';
 
+/**
+ * Logica di dominio dei segretari. La SEGRETERIA registra nuovi segretari (User +
+ * profilo Secretariat in un'unica operazione atomica con rollback). Ogni segretario
+ * può vedere, modificare ed eliminare solo il proprio profilo (self-only) e non
+ * può cambiarsi l'email.
+ */
 @Injectable()
 export class SecretariatsService {
     constructor(
@@ -26,11 +32,13 @@ export class SecretariatsService {
         };
     }
 
+    /** Tutti i segretari, come list-item. */
     async findAll(): Promise<SecretariatListItem[]> {
         const secretariats = await this.repository.findAll();
         return secretariats.map((secretariat) => this.toListItem(secretariat));
     }
 
+    /** Il profilo del segretario autenticato (uso /secretariats/me). */
     async findOwn(currentUser: AuthenticatedUser): Promise<SecretariatListItem> {
         const secretariat = await this.repository.findByUserId(currentUser.id);
         if (!secretariat) {
@@ -39,6 +47,7 @@ export class SecretariatsService {
         return this.toListItem(secretariat);
     }
 
+    /** Un segretario per id, come list-item; 404 se non esiste. */
     async findById(secretariatId: number): Promise<SecretariatListItem> {
         const secretariat = await this.repository.findById(secretariatId);
         if (!secretariat) {
@@ -47,6 +56,7 @@ export class SecretariatsService {
         return this.toListItem(secretariat);
     }
 
+    /** Crea un segretario: crea prima lo User (ruolo forzato SEGRETERIA), poi il profilo; rollback dello User in caso di errore. */
     async createOne(dto: CreateSecretariatDto): Promise<SecretariatListItem> {
         // Il nome può ripetersi tra segretari: l'unicità è garantita dall'email
         // (vincolo sugli utenti). Qui normalizziamo solo gli spazi del nome.
@@ -63,6 +73,7 @@ export class SecretariatsService {
         }
     }
 
+    /** Aggiorna il proprio profilo (self-only); l'email non è modificabile. */
     async updateOne(
         secretariatId: number,
         dto: UpdateSecretariatDto,
@@ -95,6 +106,7 @@ export class SecretariatsService {
         }
     }
 
+    /** Elimina il proprio profilo (self-only) e il relativo User. */
     async deleteOne(secretariatId: number, currentUser: AuthenticatedUser): Promise<void> {
         const secretariat = await this.repository.findById(secretariatId);
         if (!secretariat) {

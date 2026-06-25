@@ -111,15 +111,18 @@ export class ExamSessionsService {
         }
     }
 
+    /** Tutte le sessioni d'esame, come list-item. */
     async findAll(): Promise<ExamSessionListItem[]> {
         const sessions = await this.repository.findAll();
         return sessions.map((session) => this.toListItem(session));
     }
 
+    /** Una sessione per id, come list-item; 404 se non esiste. */
     async findById(examSessionId: number): Promise<ExamSessionListItem> {
         return this.toListItem(await this.getEntityById(examSessionId));
     }
 
+    /** Crea una sessione; valida date, non-sovrapposizione dei periodi e unicità del nome. */
     async createOne(dto: CreateExamSessionDto): Promise<ExamSessionListItem> {
         this.validateDates(dto);
         await this.assertNoSessionOverlap(dto.startDate, dto.endDate);
@@ -132,6 +135,7 @@ export class ExamSessionsService {
         }
     }
 
+    /** Aggiorna una sessione; rivalida date e non-sovrapposizione sui valori risultanti. */
     async updateOne(examSessionId: number, dto: UpdateExamSessionDto): Promise<ExamSessionListItem> {
         const session = await this.getEntityById(examSessionId);
         const merged = {
@@ -158,6 +162,7 @@ export class ExamSessionsService {
         }
     }
 
+    /** Elimina una sessione; 409 se ha appelli collegati. */
     async deleteOne(examSessionId: number): Promise<void> {
         // Una sessione con appelli pianificati non è eliminabile (FK RESTRICT):
         // controlliamo prima per dare un 409 chiaro invece del 400 generico.

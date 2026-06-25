@@ -3,6 +3,7 @@ import { IsDateString, IsEnum, IsInt, IsPositive, Max, Min } from 'class-validat
 import { ExamType } from './exam-type.enum';
 import { RoomType } from './room-type.enum';
 
+/** DTO di creazione di un appello d'esame, con data, fascia oraria, tipo aula/esame e riferimenti a materia e sessione. */
 export class CreateExamDto {
     @ApiProperty({ example: '2026-06-15', description: "Data dell'appello (ISO YYYY-MM-DD)" })
     @IsDateString({}, { message: "La data dell'esame deve essere una data valida (formato AAAA-MM-GG)" })

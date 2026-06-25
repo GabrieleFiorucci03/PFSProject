@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsInt, IsNotEmpty, IsPositive, IsString, Max, MaxLength, Min } from 'class-validator';
 
+/** DTO di creazione di un insegnamento, con riferimenti al corso di laurea e al docente titolare. */
 export class CreateSubjectDto {
     @ApiProperty({ example: 'Analisi Matematica', maxLength: 255 })
     @IsString({ message: "Il nome dell'insegnamento deve essere una stringa di testo" })

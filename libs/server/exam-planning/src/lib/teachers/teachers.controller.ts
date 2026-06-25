@@ -18,6 +18,12 @@ import { TeachersService } from './teachers.service';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
 
+/**
+ * Endpoint REST per i docenti (`/api/teachers`).
+ * La SEGRETERIA gestisce la lista e le operazioni CRUD; il DOCENTE può vedere,
+ * modificare ed eliminare solo il proprio profilo (via `GET /me` e `:teacherId`
+ * con controllo di proprietà nel service).
+ */
 @ApiTags('Teachers APIs')
 @Controller('teachers')
 export class TeachersController {

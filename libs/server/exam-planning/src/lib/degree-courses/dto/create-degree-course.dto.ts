@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsInt, IsNotEmpty, IsOptional, IsString, Max, MaxLength, Min } from "class-validator";
 
+/** DTO di creazione di un corso di laurea. `yearsDuration` ha default 3 se omesso. */
 export class CreateDegreeCourseDto {
     @ApiProperty({example: 'Ingegneria Informatica', maxLength: 255})
     @IsString({ message: 'Il nome del corso di laurea deve essere una stringa di testo' })

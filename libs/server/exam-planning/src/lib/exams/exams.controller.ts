@@ -19,6 +19,12 @@ import { ExamsService } from './exams.service';
 import { CreateExamDto } from './dto/create-exam.dto';
 import { UpdateExamDto } from './dto/update-exam.dto';
 
+/**
+ * Endpoint REST per gli appelli d'esame (`/api/exams`).
+ * Il DOCENTE crea appelli solo per le proprie materie (`POST`), li modifica/elimina
+ * se non sono passati; la SEGRETERIA vede e gestisce tutti gli appelli.
+ * `GET /by-course-year` serve al calendario per rilevare conflitti corso+anno+giorno.
+ */
 @ApiTags('Exams APIs')
 @Controller('exams')
 export class ExamsController {

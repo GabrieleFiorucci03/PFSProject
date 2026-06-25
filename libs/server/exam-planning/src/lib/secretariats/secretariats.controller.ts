@@ -18,6 +18,11 @@ import { SecretariatsService } from './secretariats.service';
 import { CreateSecretariatDto } from './dto/create-secretariat.dto';
 import { UpdateSecretariatDto } from './dto/update-secretariat.dto';
 
+/**
+ * Endpoint REST per i segretari (`/api/secretariats`).
+ * Tutte le rotte sono riservate alla SEGRETERIA. Modifica e eliminazione sono
+ * self-only (nel service): un segretario opera solo sul proprio profilo.
+ */
 @ApiTags('Secretariats APIs')
 @Controller('secretariats')
 export class SecretariatsController {

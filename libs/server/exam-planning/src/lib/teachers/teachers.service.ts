@@ -12,6 +12,13 @@ import { handleDatabaseError } from '../database-error.helper';
 import { normalizeName } from '../name-normalize.helper';
 import { TeacherListItem } from './interfaces/teacher-list-item.interface';
 
+/**
+ * Logica di dominio dei docenti. La SEGRETERIA registra nuovi docenti (User +
+ * profilo Teacher in un'unica operazione atomica con rollback), può modificarli
+ * ed eliminarli. Il DOCENTE può vedere/modificare/eliminare solo il proprio
+ * profilo e non può cambiarsi l'email. L'eliminazione è bloccata se ci sono
+ * insegnamenti o appelli collegati (FK RESTRICT).
+ */
 @Injectable()
 export class TeachersService {
     constructor(
@@ -30,11 +37,13 @@ export class TeachersService {
         };
     }
 
+    /** Tutti i docenti, come list-item (uso SEGRETERIA). */
     async findAll(): Promise<TeacherListItem[]> {
         const teachers = await this.repository.findAll();
         return teachers.map((teacher) => this.toListItem(teacher));
     }
 
+    /** Il profilo del docente autenticato (uso /teachers/me). */
     async findOwn(currentUser: AuthenticatedUser): Promise<TeacherListItem> {
         const teacher = await this.repository.findByUserId(currentUser.id);
         if (!teacher) {
@@ -43,6 +52,7 @@ export class TeachersService {
         return this.toListItem(teacher);
     }
 
+    /** Un docente per id; il DOCENTE può accedere solo al proprio profilo. */
     async findById(teacherId: number, currentUser: AuthenticatedUser): Promise<TeacherListItem> {
         const teacher = await this.repository.findById(teacherId);
         if (!teacher) {
@@ -54,6 +64,7 @@ export class TeachersService {
         return this.toListItem(teacher);
     }
 
+    /** Crea un docente: crea prima lo User (ruolo forzato DOCENTE), poi il profilo Teacher; rollback dello User in caso di errore. */
     async createOne(dto: CreateTeacherDto): Promise<TeacherListItem> {
         // Il nome può ripetersi tra docenti: l'unicità è garantita dall'email
         // (vincolo sugli utenti). Qui normalizziamo solo gli spazi del nome.
@@ -70,6 +81,7 @@ export class TeachersService {
         }
     }
 
+    /** Aggiorna un docente; il DOCENTE non può modificare l'email né profili altrui. */
     async updateOne(
         teacherId: number,
         dto: UpdateTeacherDto,
@@ -107,6 +119,7 @@ export class TeachersService {
         }
     }
 
+    /** Elimina un docente (e il suo User); 409 se ha insegnamenti o appelli collegati. */
     async deleteOne(teacherId: number, currentUser: AuthenticatedUser): Promise<void> {
         const teacher = await this.repository.findById(teacherId);
         if (!teacher) {

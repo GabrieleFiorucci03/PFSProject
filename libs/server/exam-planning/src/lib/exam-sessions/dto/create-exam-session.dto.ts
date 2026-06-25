@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsDateString, IsNotEmpty, IsString, MaxLength } from "class-validator";
 
+/** DTO di creazione di una sessione d'esame, con periodo sessione e finestra di pianificazione. */
 export class CreateExamSessionDto {
     @ApiProperty({example: 'Giugno 2026', maxLength: 100})
     @IsString({ message: 'Il nome della sessione deve essere una stringa di testo' })

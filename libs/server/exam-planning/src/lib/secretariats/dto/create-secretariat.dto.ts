@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
+/** DTO di registrazione di un segretario (nome, email, password). Il ruolo SEGRETERIA è forzato dal service. */
 export class CreateSecretariatDto {
     @ApiProperty({ example: 'Anna Bianchi', maxLength: 255 })
     @IsString({ message: 'Il nome deve essere una stringa di testo' })

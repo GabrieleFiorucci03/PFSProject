@@ -11,6 +11,11 @@ import { UpdateDegreeCourseDto } from './dto/update-degree-course.dto';
 import { CreateDegreeCourseDto } from './dto/create-degree-course.dto';
 import { DegreeCourseListItem } from './interfaces/degree-course-list-item.interface';
 
+/**
+ * Logica di dominio dei corsi di laurea (gestiti dalla SEGRETERIA). Valida
+ * l'unicità del nome (case/spazi-insensitive), impedisce di eliminare un corso
+ * con insegnamenti collegati e restituisce sempre la forma piatta `DegreeCourseListItem`.
+ */
 @Injectable()
 export class DegreeCoursesService {
     constructor(
@@ -54,18 +59,20 @@ export class DegreeCoursesService {
         };
     }
 
+    /** Tutti i corsi di laurea, come list-item. */
     async findAll(): Promise<DegreeCourseListItem[]> {
         const degreeCourses = await this.repository.findAll();
         return degreeCourses.map((dc) => this.toListItem(dc));
     }
 
+    /** Un corso di laurea per id, come list-item; 404 se non esiste. */
     async findById(degreeCourseId: number): Promise<DegreeCourseListItem> {
         const degreeCourse = await this.repository.findById(degreeCourseId);
         if (!degreeCourse) throw new NotFoundException(`Corso di laurea con id ${degreeCourseId} non trovato`);
         return this.toListItem(degreeCourse);
     }
 
-    // Solo i corsi di laurea assegnati al docente corrente (via i suoi subjects).
+    /** Solo i corsi di laurea assegnati al docente corrente (via i suoi insegnamenti). */
     async findOwnDegreeCourses(currentUser: AuthenticatedUser): Promise<DegreeCourseListItem[]> {
         const teacher = await this.teacherRepository.findByUserId(currentUser.id);
         if (!teacher) {
@@ -75,6 +82,7 @@ export class DegreeCoursesService {
         return degreeCourses.map((dc) => this.toListItem(dc));
     }
 
+    /** Crea un corso di laurea; normalizza il nome e ne verifica l'unicità. */
     async createOne(dto: CreateDegreeCourseDto): Promise<DegreeCourseListItem> {
         dto.name = normalizeName(dto.name);
         await this.assertNameAvailable(dto.name);
@@ -85,6 +93,7 @@ export class DegreeCoursesService {
         }
     }
 
+    /** Aggiorna un corso di laurea; rinormalizza il nome se cambiato. */
     async updateOne(degreeCourseId: number, dto: UpdateDegreeCourseDto): Promise<DegreeCourseListItem> {
         if (dto.name !== undefined) {
             dto.name = normalizeName(dto.name);
@@ -100,6 +109,7 @@ export class DegreeCoursesService {
         }
     }
 
+    /** Elimina un corso di laurea; 409 se ha insegnamenti collegati. */
     async deleteOne(degreeCourseId: number): Promise<void> {
         // Un corso con insegnamenti collegati non è eliminabile (FK RESTRICT sul
         // DB): controlliamo prima per restituire un 409 con un messaggio chiaro

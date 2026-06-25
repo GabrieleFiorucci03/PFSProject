@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
+/** DTO di registrazione di un docente (nome, email, password). Il ruolo DOCENTE è forzato dal service. */
 export class CreateTeacherDto {
     @ApiProperty({ example: 'Mario Rossi', maxLength: 255 })
     @IsString({ message: 'Il nome deve essere una stringa di testo' })

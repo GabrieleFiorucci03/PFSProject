@@ -5,6 +5,11 @@ import { AppModule } from './app/app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import 'dotenv/config';
 
+/**
+ * Bootstrap dell'applicazione NestJS. Configura il prefisso globale `/api`,
+ * CORS, ValidationPipe (whitelist + transform), Swagger (`/api/docs`),
+ * ClassSerializerInterceptor e header Cache-Control no-store su ogni risposta.
+ */
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const globalPrefix = 'api';

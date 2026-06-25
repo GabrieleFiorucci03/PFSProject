@@ -6,6 +6,11 @@ import type { AuthenticatedUser } from '@server/auth';
 import { CreateDegreeCourseDto } from './dto/create-degree-course.dto';
 import { UpdateDegreeCourseDto } from './dto/update-degree-course.dto';
 
+/**
+ * Endpoint REST per i corsi di laurea (`/api/degree-courses`).
+ * Scritture riservate alla SEGRETERIA; il DOCENTE accede solo ai propri corsi
+ * tramite `GET /mine`.
+ */
 @ApiTags('Degree Courses APIs')
 @Controller('degree-courses')
 export class DegreeCoursesController {

@@ -19,6 +19,11 @@ import { SubjectsService } from './subjects.service';
 import { CreateSubjectDto } from './dto/create-subject.dto';
 import { UpdateSubjectDto } from './dto/update-subject.dto';
 
+/**
+ * Endpoint REST per gli insegnamenti (`/api/subjects`).
+ * CRUD riservato alla SEGRETERIA; il DOCENTE accede solo ai propri insegnamenti
+ * tramite `GET /mine`. Supporta filtri opzionali per corso di laurea e docente.
+ */
 @ApiTags('Subjects APIs')
 @Controller('subjects')
 export class SubjectsController {

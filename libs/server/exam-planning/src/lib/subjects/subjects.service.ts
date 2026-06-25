@@ -20,6 +20,12 @@ import { nameKey, normalizeName } from '../name-normalize.helper';
 import { SubjectListItem } from './interfaces/subject-list-item.interface';
 
 
+/**
+ * Logica di dominio degli insegnamenti (gestiti dalla SEGRETERIA). Valida l'unicità
+ * del nome all'interno dello stesso corso di laurea, l'anno di corso entro la
+ * durata del corso, risolve le FK (corso, docente) e impedisce di eliminare un
+ * insegnamento con appelli collegati.
+ */
 @Injectable()
 export class SubjectsService {
 
@@ -105,6 +111,7 @@ export class SubjectsService {
         if(year < 1 || year > degreeCourse.yearsDuration) throw new BadRequestException( `L'anno di corso deve essere compreso tra 1 e ${degreeCourse.yearsDuration} per il corso "${degreeCourse.name}"`,);
     }
 
+    /** Tutti gli insegnamenti, con filtri opzionali per corso di laurea e/o docente. */
     async findAll(filters: SubjectFilters = {}): Promise<SubjectListItem[]> {
         if (filters.degreeCourseId !== undefined) {
             await this.resolveDegreeCourse(filters.degreeCourseId);
@@ -116,10 +123,12 @@ export class SubjectsService {
         return subjects.map((subject) => this.toListItem(subject));
     }
 
+    /** Un insegnamento per id, come list-item; 404 se non esiste. */
     async findById(subjectId: number): Promise<SubjectListItem> {
         return this.toListItem(await this.getEntityById(subjectId));
     }
 
+    /** Solo gli insegnamenti del docente autenticato (uso /subjects/mine). */
     async findOwnSubjects(currentUser: AuthenticatedUser): Promise<SubjectListItem[]> {
         const teacher = await this.teacherRepository.findByUserId(currentUser.id);
         if(!teacher) {
@@ -129,6 +138,7 @@ export class SubjectsService {
         return subjects.map((subject) => this.toListItem(subject));
     }
 
+    /** Crea un insegnamento; risolve le FK, normalizza il nome e ne verifica l'unicità nel corso. */
     async createOne(dto: CreateSubjectDto): Promise<SubjectListItem> {
         const degreeCourse = await this.resolveDegreeCourse(dto.degreeCourseId);
         const teacher = await this.resolveTeacher(dto.teacherId);
@@ -152,6 +162,7 @@ export class SubjectsService {
         }
     }
 
+     /** Aggiorna un insegnamento; rivalida anno/nome/unicità sui valori risultanti. */
      async updateOne(subjectId: number, dto: UpdateSubjectDto): Promise<SubjectListItem> {
           const existing = await this.getEntityById(subjectId);
 
@@ -192,6 +203,7 @@ export class SubjectsService {
           }
     }
 
+    /** Elimina un insegnamento; 409 se ha appelli collegati. */
     async deleteOne(subjectId: number): Promise<void> {
          // Un insegnamento con appelli pianificati non è eliminabile (FK RESTRICT):
          // controllo proattivo per un 409 chiaro invece del 400 generico.
