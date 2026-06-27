@@ -1,0 +1,118 @@
+<mxfile host="app.diagrams.net" type="device">
+  <diagram name="Modello ER" id="er-appelli">
+    <mxGraphModel dx="1100" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1150" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ===================== ENTITA' ===================== -->
+        <mxCell id="utente" value="&lt;b&gt;UTENTE&lt;/b&gt;&lt;br&gt;&lt;br&gt;&amp;#8226; id (PK)&lt;br&gt;&amp;#8226; nome&lt;br&gt;&amp;#8226; email (UNIQUE)&lt;br&gt;&amp;#8226; password&lt;br&gt;&amp;#8226; ruolo {DOCENTE | SEGRETERIA}" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;spacingTop=6;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="540" y="40" width="270" height="160" as="geometry" />
+        </mxCell>
+
+        <mxCell id="docente" value="&lt;b&gt;DOCENTE&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="430" y="360" width="180" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="segreteria" value="&lt;b&gt;SEGRETERIA&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="730" y="360" width="180" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="insegnamento" value="&lt;b&gt;INSEGNAMENTO&lt;/b&gt;&lt;br&gt;&lt;br&gt;&amp;#8226; id (PK)&lt;br&gt;&amp;#8226; nome&lt;br&gt;&amp;#8226; anno&lt;br&gt;&amp;#8226; cfu&lt;br&gt;&lt;i&gt;UNIQUE(nome, corso)&lt;/i&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;spacingTop=6;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="80" y="600" width="260" height="150" as="geometry" />
+        </mxCell>
+
+        <mxCell id="corso" value="&lt;b&gt;CORSO DI LAUREA&lt;/b&gt;&lt;br&gt;&lt;br&gt;&amp;#8226; id (PK)&lt;br&gt;&amp;#8226; nome (UNIQUE)&lt;br&gt;&amp;#8226; durataAnni&lt;br&gt;&amp;#8226; dipartimento" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;spacingTop=6;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="80" y="950" width="260" height="140" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sessione" value="&lt;b&gt;SESSIONE D'ESAME&lt;/b&gt;&lt;br&gt;&lt;br&gt;&amp;#8226; id (PK)&lt;br&gt;&amp;#8226; nome (UNIQUE)&lt;br&gt;&amp;#8226; dataInizio&lt;br&gt;&amp;#8226; dataFine&lt;br&gt;&amp;#8226; inizioPianificazione&lt;br&gt;&amp;#8226; finePianificazione" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;spacingTop=6;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="560" y="930" width="300" height="170" as="geometry" />
+        </mxCell>
+
+        <mxCell id="appello" value="&lt;b&gt;APPELLO&lt;/b&gt;&lt;br&gt;&lt;br&gt;&amp;#8226; id (PK)&lt;br&gt;&amp;#8226; data&lt;br&gt;&amp;#8226; oraInizio&lt;br&gt;&amp;#8226; oraFine&lt;br&gt;&amp;#8226; tipoAula {STANDARD | COMPUTER_LAB |&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;ELECTRONICS_LAB | SENSORS_LAB}&lt;br&gt;&amp;#8226; tipoEsame {ORAL | WRITTEN}&lt;br&gt;&lt;i&gt;UNIQUE(data, insegnamento)&lt;/i&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;spacingTop=6;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="980" y="600" width="340" height="200" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== IS-A ===================== -->
+        <mxCell id="isa" value="IS-A" style="triangle;direction=north;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;verticalLabelPosition=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="635" y="250" width="80" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== RELAZIONI (rombi) ===================== -->
+        <mxCell id="insegna" value="INSEGNA&lt;br&gt;(titolare)" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="240" y="450" width="150" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="appartiene" value="APPARTIENE" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="130" y="810" width="160" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="riguarda" value="RIGUARDA" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="560" y="650" width="160" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="colloca" value="COLLOCA" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="900" y="850" width="160" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="pianifica" value="PIANIFICA" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="650" y="470" width="160" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== ARCHI IS-A ===================== -->
+        <mxCell id="e_utente_isa" value="" style="endArrow=none;html=1;" edge="1" parent="1" source="utente" target="isa">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_isa_doc" value="" style="endArrow=none;html=1;" edge="1" parent="1" source="isa" target="docente">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_isa_seg" value="" style="endArrow=none;html=1;" edge="1" parent="1" source="isa" target="segreteria">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== ARCHI RELAZIONI (con cardinalita') ===================== -->
+        <!-- INSEGNA: docente 1 a N insegnamento -->
+        <mxCell id="e_doc_insegna" value="1" style="endArrow=none;html=1;fontStyle=1;fontSize=13;" edge="1" parent="1" source="docente" target="insegna">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_insegna_ins" value="N" style="endArrow=none;html=1;fontStyle=1;fontSize=13;" edge="1" parent="1" source="insegna" target="insegnamento">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- APPARTIENE: insegnamento N a 1 corso -->
+        <mxCell id="e_ins_appartiene" value="N" style="endArrow=none;html=1;fontStyle=1;fontSize=13;" edge="1" parent="1" source="insegnamento" target="appartiene">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_appartiene_corso" value="1" style="endArrow=none;html=1;fontStyle=1;fontSize=13;" edge="1" parent="1" source="appartiene" target="corso">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- RIGUARDA: insegnamento 1 a N appello -->
+        <mxCell id="e_ins_riguarda" value="1" style="endArrow=none;html=1;fontStyle=1;fontSize=13;" edge="1" parent="1" source="insegnamento" target="riguarda">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_riguarda_app" value="N" style="endArrow=none;html=1;fontStyle=1;fontSize=13;" edge="1" parent="1" source="riguarda" target="appello">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- COLLOCA: sessione 1 a N appello -->
+        <mxCell id="e_sess_colloca" value="1" style="endArrow=none;html=1;fontStyle=1;fontSize=13;" edge="1" parent="1" source="sessione" target="colloca">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_colloca_app" value="N" style="endArrow=none;html=1;fontStyle=1;fontSize=13;" edge="1" parent="1" source="colloca" target="appello">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- PIANIFICA: docente 1 a N appello -->
+        <mxCell id="e_doc_pianifica" value="1" style="endArrow=none;html=1;fontStyle=1;fontSize=13;" edge="1" parent="1" source="docente" target="pianifica">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_pianifica_app" value="N" style="endArrow=none;html=1;fontStyle=1;fontSize=13;" edge="1" parent="1" source="pianifica" target="appello">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

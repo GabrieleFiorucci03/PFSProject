@@ -1326,6 +1326,43 @@ per colorare di rosso i giorni ``occupati'' dalla regola di conflitto, sia per
 mostrare \emph{quali} esami occupano un giorno in cui non può inserirne uno
 proprio (anche se non ne è il titolare).
 
+\paragraph{Scelte di dominio deliberate (e alternative possibili).} Alcune delle
+regole sopra sono \textbf{scelte progettuali volute}, adottate per privilegiare la
+tutela dello studente e la semplicità del modello; si segnalano qui anche le
+alternative ragionevoli, lasciate fuori di proposito perché non necessarie agli
+obiettivi del sistema.
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Un solo appello al giorno per corso+anno.} Il conflitto
+        ``corso+anno+giorno'' blocca \emph{qualsiasi} secondo appello nello stesso
+        giorno per lo stesso anno di corso, anche se di \emph{materie diverse}.
+        È voluto, per non far accavallare più esami agli studenti di uno stesso
+        anno. \emph{Alternativa}: consentire più appelli nello stesso giorno
+        distinguendo la fascia oraria (controllo sulla sovrapposizione di orario
+        anziché sull'intera giornata).
+  \item \textbf{Nessun controllo sull'aula fisica.} \code{roomType} è un
+        \emph{tipo} di aula, non un'aula specifica: due esami di corsi diversi nello
+        stesso giorno e fascia con lo stesso \code{roomType} sono ammessi.
+        \emph{Alternativa}: modellare le aule come entità e impedire il doppio uso
+        fisico di una stessa aula in sovrapposizione oraria.
+  \item \textbf{Orari come interi \code{0}--\code{24} senza vincoli reali.} Si
+        impone solo \code{startHour < endHour}. È sufficiente per il dominio
+        didattico. \emph{Alternativa}: restringere a una fascia sensata (es.
+        \code{8}--\code{20}) e/o imporre una durata minima e massima dell'appello.
+  \item \textbf{Docente bloccato sui propri appelli a finestra chiusa.} Chiusa la
+        finestra di pianificazione il docente non può più modificare o eliminare i
+        \emph{propri} appelli (solo la Segreteria può): è voluto, per ``congelare''
+        il calendario una volta pubblicato. \emph{Alternativa}: lasciare al docente
+        la correzione dei propri appelli fino all'inizio effettivo della sessione.
+  \item \textbf{Self-only tra segreterie.} Una Segreteria può gestire solo il
+        proprio profilo, non quello di altre segreterie. È voluto per evitare
+        modifiche incrociate fra account amministrativi. \emph{Alternativa}: se la
+        Segreteria è intesa come ruolo ``amministratore'' pieno, consentirle di
+        gestire anche gli altri account di segreteria.
+\end{itemize}
+Tutte queste regole sono fatte rispettare \emph{in modo autoritativo dal backend}:
+adottare una delle alternative significherebbe intervenire nei relativi service
+(e nei vincoli del database dove presenti), senza impatti sull'architettura.
+
 \subsection{Docenti e segretari (creazione atomica e \emph{self-only})}
 La creazione di un docente o segretario coinvolge due tabelle (utente e profilo)
 e dev'essere atomica:

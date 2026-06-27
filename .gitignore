@@ -47,3 +47,9 @@ test-output
 
 vite.config.*.timestamp*
 .env
+
+# LaTeX build artifacts (keep .tex/.pdf, ignore auxiliary files)
+docs/*.aux
+docs/*.log
+docs/*.out
+docs/*.toc

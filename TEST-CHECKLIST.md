@@ -46,80 +46,80 @@
 
 ## 1. Autenticazione e ruoli
 
-- [ ] Login con `gabriele.fiorucci@unibs.it` / `Password1!` → entra come SEGRETERIA
-- [ ] Login con `devis.bianchini@unibs.it` / `Password1!` → entra come DOCENTE
-- [ ] Login con **email inesistente** → 401 (stesso messaggio generico)
-- [ ] Login con email valida ma **password sbagliata** → 401 (NON deve dire "password errata", no user enumeration)
-- [ ] Accesso a una rotta protetta **senza token** → 401
-- [ ] DOCENTE che chiama un endpoint SEGRETERIA (es. `GET /api/exams`, `GET /api/subjects`, `GET /api/teachers`) → 403
-- [ ] `POST /api/auth/register` e `POST /api/users` come DOCENTE → 403 (sono SEGRETERIA-only e non vanno usati dal frontend)
+- [x] Login con `gabriele.fiorucci@unibs.it` / `Password1!` → entra come SEGRETERIA
+- [x] Login con `devis.bianchini@unibs.it` / `Password1!` → entra come DOCENTE
+- [x] Login con **email inesistente** → 401 (stesso messaggio generico)
+- [x] Login con email valida ma **password sbagliata** → 401 (NON deve dire "password errata", no user enumeration)
+- [x] Accesso a una rotta protetta **senza token** → 401
+- [x] DOCENTE che chiama un endpoint SEGRETERIA (es. `GET /api/exams`, `GET /api/subjects`, `GET /api/teachers`) → 403
+- [x] `POST /api/auth/register` e `POST /api/users` come DOCENTE → 403 (sono SEGRETERIA-only e non vanno usati dal frontend)
 
 ---
 
 ## 2. Corsi di laurea (DegreeCourse) — SEGRETERIA
 
-- [ ] Creazione corso nuovo (es. "Ingegneria Gestionale", 3 anni) → ok
-- [ ] Creazione con **nome duplicato esatto** ("Ingegneria Informatica") → 409
-- [ ] Creazione con nome che differisce solo per **maiuscole/spazi** ("ingegneria informatica", "Ingegneria  Informatica") → 409 (unicità case/spazi-insensitive)
-- [ ] Modifica nome di un corso in uno già esistente → 409
-- [ ] **Eliminazione di un corso con materie collegate** (es. Informatica) → **bloccata con 409** e messaggio chiaro ("Impossibile eliminare il corso di laurea: ha N insegnamenti collegati…"). Verifica che NON cancelli a cascata le materie.
-- [ ] Eliminazione di un corso **senza** materie → ok
+- [x] Creazione corso nuovo (es. "Ingegneria Gestionale", 3 anni) → ok
+- [x] Creazione con **nome duplicato esatto** ("Ingegneria Informatica") → 409
+- [x] Creazione con nome che differisce solo per **maiuscole/spazi** ("ingegneria informatica", "Ingegneria  Informatica") → 409 (unicità case/spazi-insensitive)
+- [x] Modifica nome di un corso in uno già esistente → 409
+- [x] **Eliminazione di un corso con materie collegate** (es. Informatica) → **bloccata con 409** e messaggio chiaro ("Impossibile eliminare il corso di laurea: ha N insegnamenti collegati…"). Verifica che NON cancelli a cascata le materie.
+- [x] Eliminazione di un corso **senza** materie → ok
 
 ---
 
 ## 3. Docenti (Teacher) — creazione SEGRETERIA, profilo self-service
 
-- [ ] SEGRETERIA crea un docente nuovo (nome + email + password) → ok, ruolo forzato DOCENTE
-- [ ] Creazione docente con **email già usata** → 409 e **nessun utente orfano** rimane (rollback)
-- [ ] Due docenti con **stesso nome** ma email diverse → ammesso (l'unicità è solo sull'email)
-- [ ] DOCENTE apre la propria **area personale** (`/teachers/me`) → vede il proprio profilo
-- [ ] DOCENTE modifica il proprio **nome** → ok
-- [ ] DOCENTE tenta di modificare la propria **email** → 403 ("Non puoi modificare la tua email")
-- [ ] DOCENTE **cambia la propria password** → salvato; il **vecchio** login NON funziona più, il **nuovo** sì (verifica con logout/login). Password debole (no maiuscola/simbolo o < 8) → 400
-- [ ] DOCENTE tenta di modificare/eliminare **un altro docente** → 403
-- [ ] SEGRETERIA modifica/elimina **qualunque** docente → ok
-- [ ] **Eliminazione di un docente che possiede materie/esami** (es. Devis) → **bloccata con 409** e messaggio chiaro ("Impossibile eliminare il docente: ha N insegnamenti e M appelli collegati…"). Verifica che non rimuova materie/esami/utente a cascata.
+- [x] SEGRETERIA crea un docente nuovo (nome + email + password) → ok, ruolo forzato DOCENTE
+- [x] Creazione docente con **email già usata** → 409 e **nessun utente orfano** rimane (rollback)
+- [x] Due docenti con **stesso nome** ma email diverse → ammesso (l'unicità è solo sull'email)
+- [x] DOCENTE apre la propria **area personale** (`/teachers/me`) → vede il proprio profilo
+- [x] DOCENTE modifica il proprio **nome** → ok
+- [x] DOCENTE tenta di modificare la propria **email** → 403 ("Non puoi modificare la tua email")
+- [x] DOCENTE **cambia la propria password** → salvato; il **vecchio** login NON funziona più, il **nuovo** sì (verifica con logout/login). Password debole (no maiuscola/simbolo o < 8) → 400
+- [x] DOCENTE tenta di modificare/eliminare **un altro docente** → 403
+- [x] SEGRETERIA modifica/elimina **qualunque** docente → ok
+- [x] **Eliminazione di un docente che possiede materie/esami** (es. Devis) → **bloccata con 409** e messaggio chiaro ("Impossibile eliminare il docente: ha N insegnamenti e M appelli collegati…"). Verifica che non rimuova materie/esami/utente a cascata.
 
 ---
 
 ## 4. Segreterie (Secretariat) — self-only
 
-- [ ] SEGRETERIA crea una **seconda** segreteria (serve per i test seguenti) → ok
-- [ ] Segretario A modifica il proprio nome → ok
-- [ ] Segretario A tenta di modificare la propria email → 403
-- [ ] Segretario A **cambia la propria password** → salvato; vecchia password non valida più, nuova sì (logout/login). Password debole → 400
-- [ ] Segretario A tenta di modificare/eliminare **Segretario B** → 403 (self-only, anche tra segreterie!)
-- [ ] Segretario elimina **il proprio** account → ok
+- [x] SEGRETERIA crea una **seconda** segreteria (serve per i test seguenti) → ok
+- [x] Segretario A modifica il proprio nome → ok
+- [x] Segretario A tenta di modificare la propria email → 403
+- [x] Segretario A **cambia la propria password** → salvato; vecchia password non valida più, nuova sì (logout/login). Password debole → 400
+- [x] Segretario A tenta di modificare/eliminare **Segretario B** → 403 (self-only, anche tra segreterie!)
+- [x] Segretario elimina **il proprio** account → ok
 
 ---
 
 ## 5. Insegnamenti (Subject) — SEGRETERIA crea, DOCENTE vede le proprie
 
-- [ ] Creazione materia valida (corso + docente esistenti) → ok
-- [ ] Creazione con **corso inesistente** o **docente inesistente** → 404
-- [ ] **anno = 0** o **anno > durata del corso** (es. anno 4 su corso di 3 anni) → 400
-- [ ] anno valido al limite (anno = 3 su corso di 3) → ok
-- [ ] Nome duplicato **nello stesso corso** (anche solo maiuscole/spazi diversi) → 409
-- [ ] Stesso nome materia ma in **un altro corso** → ammesso (unicità è per coppia nome+corso)
-- [ ] DOCENTE chiama `/subjects/mine` → vede **solo** le proprie materie
-- [ ] DOCENTE chiama `GET /subjects` (lista completa) → 403
-- [ ] **Eliminazione materia con esami collegati** → **bloccata con 409** e messaggio chiaro ("Impossibile eliminare l'insegnamento: ha N appelli collegati…")
+- [x] Creazione materia valida (corso + docente esistenti) → ok
+- [x] Creazione con **corso inesistente** o **docente inesistente** → 404
+- [x] **anno = 0** o **anno > durata del corso** (es. anno 4 su corso di 3 anni) → 400
+- [x] anno valido al limite (anno = 3 su corso di 3) → ok
+- [x] Nome duplicato **nello stesso corso** (anche solo maiuscole/spazi diversi) → 409
+- [x] Stesso nome materia ma in **un altro corso** → ammesso (unicità è per coppia nome+corso)
+- [x] DOCENTE chiama `/subjects/mine` → vede **solo** le proprie materie
+- [x] DOCENTE chiama `GET /subjects` (lista completa) → 403
+- [x] **Eliminazione materia con esami collegati** → **bloccata con 409** e messaggio chiaro ("Impossibile eliminare l'insegnamento: ha N appelli collegati…")
 
 ---
 
 ## 6. Sessioni d'esame (ExamSession) — SEGRETERIA
 
-- [ ] Creazione sessione valida → ok
-- [ ] Nome duplicato (anche maiuscole/spazi diversi) → 409
-- [ ] **startDate ≥ endDate** → 400
-- [ ] **planningStartDate ≥ planningEndDate** → 400
-- [ ] **planningEndDate > startDate** (la pianificazione finisce dopo l'inizio sessione) → 400
-- [ ] Caso limite valido: `planningEndDate == startDate` → ok
-- [ ] Modifica parziale (solo una data) che rende l'insieme incoerente → 400 (la validazione usa i valori esistenti per i campi non passati)
-- [ ] **Periodi-sessione non sovrapponibili**: creare/modificare una sessione il cui `[startDate, endDate]` si sovrappone a un'altra → **409** (col nome della sessione in conflitto)
-- [ ] **Finestre di pianificazione sovrapponibili**: una nuova sessione con periodo distinto ma finestra di pianificazione sovrapposta a un'altra → **ok** (consentito)
-- [ ] **Eliminazione di una sessione con appelli collegati** → **bloccata con 409** e messaggio chiaro ("Impossibile eliminare la sessione: ha N appelli collegati…")
-- [ ] Eliminazione di una sessione **senza** appelli → ok
+- [x] Creazione sessione valida → ok
+- [x] Nome duplicato (anche maiuscole/spazi diversi) → 409
+- [x] **startDate ≥ endDate** → 400
+- [x] **planningStartDate ≥ planningEndDate** → 400
+- [x] **planningEndDate > startDate** (la pianificazione finisce dopo l'inizio sessione) → 400
+- [x] Caso limite valido: `planningEndDate == startDate` → ok
+- [x] Modifica parziale (solo una data) che rende l'insieme incoerente → 400 (la validazione usa i valori esistenti per i campi non passati)
+- [x] **Periodi-sessione non sovrapponibili**: creare/modificare una sessione il cui `[startDate, endDate]` si sovrappone a un'altra → **409** (col nome della sessione in conflitto)
+- [x] **Finestre di pianificazione sovrapponibili**: una nuova sessione con periodo distinto ma finestra di pianificazione sovrapposta a un'altra → **ok** (consentito)
+- [x] **Eliminazione di una sessione con appelli collegati** → **bloccata con 409** e messaggio chiaro ("Impossibile eliminare la sessione: ha N appelli collegati…")
+- [x] Eliminazione di una sessione **senza** appelli → ok
 
 ---
 
@@ -129,27 +129,27 @@
 > Modifica/eliminazione: SEGRETERIA su tutti, DOCENTE solo i propri.
 
 ### 7a. Creazione (come DOCENTE, con pianificazione APERTA — vedi sez. 9)
-- [ ] Devis crea un appello per una **propria** materia in giorno feriale dentro la sessione corrente → ok
-- [ ] Devis tenta di creare un appello per **Scienza delle Costruzioni** (materia di Mario) → 403 ("solo per le tue materie")
-- [ ] **startHour ≥ endHour** (es. 11–9, o 10–10) → 400
-- [ ] Data **fuori dall'intervallo della sessione** (prima dello start o dopo l'end) → 400
-- [ ] Data in un **weekend** (sabato/domenica dentro la sessione) → 400
-- [ ] **Conflitto corso+anno+giorno**: stessa data di un altro esame dello **stesso corso e anno** (anche materia diversa) → 409. ⚠️ Verifica se è il comportamento voluto (vedi sez. 10).
-- [ ] **Stessa materia due volte nella stessa sessione** → 409
-- [ ] Vincolo DB `UNIQUE(date, subject)`: stessa materia + stessa data → 409
+- [x] Devis crea un appello per una **propria** materia in giorno feriale dentro la sessione corrente → ok
+- [x] Devis tenta di creare un appello per **Scienza delle Costruzioni** (materia di Mario) → 403 ("solo per le tue materie")
+- [x] **startHour ≥ endHour** (es. 11–9, o 10–10) → 400
+- [x] Data **fuori dall'intervallo della sessione** (prima dello start o dopo l'end) → 400
+- [x] Data in un **weekend** (sabato/domenica dentro la sessione) → 400
+- [x] **Conflitto corso+anno+giorno**: stessa data di un altro esame dello **stesso corso e anno** (anche materia diversa) → 409. ⚠️ Verifica se è il comportamento voluto (vedi sez. 10).
+- [x] **Stessa materia due volte nella stessa sessione** → 409
+- [x] Vincolo DB `UNIQUE(date, subject)`: stessa materia + stessa data → 409
 
 ### 7b. Modifica / eliminazione
-- [ ] DOCENTE modifica un **proprio** esame (dentro la finestra di pianificazione) → ok
-- [ ] DOCENTE tenta di modificare/eliminare un esame di **un altro docente** → 403
-- [ ] DOCENTE in modifica tenta di spostare l'esame su una materia **non sua** → 403
-- [ ] SEGRETERIA modifica/elimina **qualunque** esame → ok
-- [ ] SEGRETERIA modifica un esame **anche fuori dalla finestra di pianificazione** → ok (la SEGRETERIA bypassa il controllo finestra)
-- [ ] Modifica che genera un conflitto (sposta su una data già occupata dallo stesso corso+anno) → 409
+- [x] DOCENTE modifica un **proprio** esame (dentro la finestra di pianificazione) → ok
+- [x] DOCENTE tenta di modificare/eliminare un esame di **un altro docente** → 403
+- [x] DOCENTE in modifica tenta di spostare l'esame su una materia **non sua** → 403
+- [x] SEGRETERIA modifica/elimina **qualunque** esame → ok
+- [x] SEGRETERIA modifica un esame **anche fuori dalla finestra di pianificazione** → ok (la SEGRETERIA bypassa il controllo finestra)
+- [x] Modifica che genera un conflitto (sposta su una data già occupata dallo stesso corso+anno) → 409
 
 ### 7c. Visibilità
-- [ ] `GET /exams` (lista completa) come SEGRETERIA → ok; come DOCENTE → 403
-- [ ] `GET /exams/mine` come DOCENTE → solo i propri esami
-- [ ] Nessuna risposta espone `passwordHash` del docente
+- [x] `GET /exams` (lista completa) come SEGRETERIA → ok; come DOCENTE → 403
+- [x] `GET /exams/mine` come DOCENTE → solo i propri esami
+- [x] Nessuna risposta espone `passwordHash` del docente
 
 ---
 
@@ -157,14 +157,14 @@
 
 > Richiede una materia propria selezionata. I colori riflettono SOLO le regole BE.
 
-- [ ] Senza materia selezionata: i giorni mostrano **viola** (finestra pianificazione) e **blu** (giorni di sessione)
-- [ ] Selezionando una materia: nei giorni di **sessione** i giorni feriali liberi diventano **verdi**, gli altri **rossi**
-- [ ] Giorno **weekend** dentro la sessione → rosso
-- [ ] Giorno con un esame già esistente per quel **corso+anno** → rosso
-- [ ] Materia **già pianificata** in quella sessione → tutti i giorni di quella sessione rossi per quella materia
-- [ ] Click su giorno **verde** → apre `/exams/new` con data, materia e sessione **precompilate**
-- [ ] Click su giorno **rosso/non disponibile** → nessuna azione
-- [ ] La creazione dal form precompilato va a buon fine → l'esame appare come evento sul calendario
+- [x] Senza materia selezionata: i giorni mostrano **viola** (finestra pianificazione) e **blu** (giorni di sessione)
+- [x] Selezionando una materia: nei giorni di **sessione** i giorni feriali liberi diventano **verdi**, gli altri **rossi**
+- [x] Giorno **weekend** dentro la sessione → rosso
+- [x] Giorno con un esame già esistente per quel **corso+anno** → rosso
+- [x] Materia **già pianificata** in quella sessione → tutti i giorni di quella sessione rossi per quella materia
+- [x] Click su giorno **verde** → apre `/exams/new` con data, materia e sessione **precompilate**
+- [x] Click su giorno **rosso/non disponibile** → nessuna azione
+- [x] La creazione dal form precompilato va a buon fine → l'esame appare come evento sul calendario
 
 ---
 
@@ -173,14 +173,14 @@
 > Questi test verificano la regola: **un DOCENTE può creare/modificare un appello solo se OGGI è dentro `[planningStartDate, planningEndDate]` della sessione.**
 > Sposta la data di Windows e ricarica l'app (e rifai login se il token scade).
 
-- [ ] **PC dentro la finestra di pianificazione** della Sessione Estiva (base−5 → base+10): DOCENTE crea un appello in quella sessione → ok. Sul calendario i giorni feriali sono verdi.
-- [ ] **PC dopo la chiusura della pianificazione** (es. base+11, finestra Estiva chiusa): DOCENTE crea/modifica appello in quella sessione → 403 ("Puoi pianificare esami solo tra …"). Sul calendario i giorni di sessione diventano rossi.
-- [ ] **PC prima dell'apertura della pianificazione** (es. base−10): stessa cosa → 403, giorni rossi
-- [ ] **PC dentro la finestra della Sessione Autunnale** (base+60 → base+80): la pianificazione di Autunnale si apre → DOCENTE può pianificare lì
-- [ ] **SEGRETERIA fuori da ogni finestra**: può comunque modificare gli esami (nessun blocco temporale)
-- [ ] **Dashboard SEGRETERIA**: spostando il PC dentro l'intervallo di una sessione, il contatore "Sessioni in corso" aumenta
-- [ ] **Dashboard SEGRETERIA**: click su un giorno → mostra gli esami di quel giorno con docente e orario
-- [ ] Verifica che NON ci siano sfasamenti di **fuso orario** sui giorni (un esame del lunedì non deve comparire di domenica/martedì)
+- [x] **PC dentro la finestra di pianificazione** della Sessione Estiva (base−5 → base+10): DOCENTE crea un appello in quella sessione → ok. Sul calendario i giorni feriali sono verdi.
+- [x] **PC dopo la chiusura della pianificazione** (es. base+11, finestra Estiva chiusa): DOCENTE crea/modifica appello in quella sessione → 403 ("Puoi pianificare esami solo tra …"). Sul calendario i giorni di sessione diventano rossi.
+- [x] **PC prima dell'apertura della pianificazione** (es. base−10): stessa cosa → 403, giorni rossi
+- [x] **PC dentro la finestra della Sessione Autunnale** (base+60 → base+80): la pianificazione di Autunnale si apre → DOCENTE può pianificare lì
+- [x] **SEGRETERIA fuori da ogni finestra**: può comunque modificare gli esami (nessun blocco temporale)
+- [x] **Dashboard SEGRETERIA**: spostando il PC dentro l'intervallo di una sessione, il contatore "Sessioni in corso" aumenta
+- [x] **Dashboard SEGRETERIA**: click su un giorno → mostra gli esami di quel giorno con docente e orario
+- [x] Verifica che NON ci siano sfasamenti di **fuso orario** sui giorni (un esame del lunedì non deve comparire di domenica/martedì)
 
 ---
 
