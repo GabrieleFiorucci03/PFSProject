@@ -33,6 +33,9 @@ export function AppLayout() {
 
   // Stato del popup di conferma logout: true = popup visibile.
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  // Stato del menu mobile (hamburger): true = menu a tendina aperto. Su desktop
+  // (>= md) il menu è sempre visibile in orizzontale e questo stato è ignorato.
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Classe del link: evidenzia la rotta attiva (NavLink passa isActive).
   function linkClass({ isActive }: { isActive: boolean }) {
@@ -47,39 +50,117 @@ export function AppLayout() {
   return (
     <div className="min-h-screen bg-slate-100">
       <nav className="bg-blue-800 text-white shadow">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <NavLink to="/" className="mr-2 font-bold transition hover:text-blue-200">
+        <div className="mx-auto max-w-6xl px-4 py-3">
+          {/* Barra superiore: sempre visibile. Su mobile mostra logo + hamburger;
+              su desktop (md+) i link e l'area utente compaiono in linea. */}
+          <div className="flex items-center justify-between gap-2">
+            <NavLink
+              to="/"
+              className="font-bold transition hover:text-blue-200"
+              onClick={() => setMobileMenuOpen(false)}
+            >
               Appelli
             </NavLink>
-            {visibleNavItems.map((item) => (
-              <NavLink key={item.to} to={item.to} className={linkClass}>
-                {item.label}
-              </NavLink>
-            ))}
-          </div>
 
-          <div className="flex items-center gap-3 text-sm">
-            {user && (
-              <NavLink
-                to="/me"
-                className="text-blue-100 transition hover:text-white"
-                title="Area personale"
+            {/* Link di navigazione: in linea solo da md in su. */}
+            <div className="hidden flex-wrap items-center gap-2 md:flex">
+              {visibleNavItems.map((item) => (
+                <NavLink key={item.to} to={item.to} className={linkClass}>
+                  {item.label}
+                </NavLink>
+              ))}
+            </div>
+
+            {/* Area utente + logout: in linea solo da md in su. */}
+            <div className="hidden items-center gap-3 text-sm md:flex">
+              {user && (
+                <NavLink
+                  to="/me"
+                  className="text-blue-100 transition hover:text-white"
+                  title="Area personale"
+                >
+                  {user.name}{' '}
+                  <span className="rounded bg-blue-900 px-2 py-0.5 text-xs">
+                    {user.role}
+                  </span>
+                </NavLink>
+              )}
+              <button
+                type="button"
+                onClick={() => setShowLogoutConfirm(true)}
+                className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium transition hover:bg-blue-500"
               >
-                {user.name}{' '}
-                <span className="rounded bg-blue-900 px-2 py-0.5 text-xs">
-                  {user.role}
-                </span>
-              </NavLink>
-            )}
+                Logout
+              </button>
+            </div>
+
+            {/* Pulsante hamburger: visibile solo sotto md. Apre/chiude il menu. */}
             <button
               type="button"
-              onClick={() => setShowLogoutConfirm(true)}
-              className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium transition hover:bg-blue-500"
+              onClick={() => setMobileMenuOpen((open) => !open)}
+              className="rounded-md p-2 transition hover:bg-blue-700 md:hidden"
+              aria-label="Apri menu"
+              aria-expanded={mobileMenuOpen}
             >
-              Logout
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                {mobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
             </button>
           </div>
+
+          {/* Menu mobile a tendina: appare sotto la barra solo quando aperto e
+              solo sotto md. Ogni voce chiude il menu al click. */}
+          {mobileMenuOpen && (
+            <div className="mt-3 flex flex-col gap-1 border-t border-blue-700 pt-3 md:hidden">
+              {visibleNavItems.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className={linkClass}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item.label}
+                </NavLink>
+              ))}
+
+              <div className="mt-2 flex items-center justify-between border-t border-blue-700 pt-3">
+                {user && (
+                  <NavLink
+                    to="/me"
+                    className="text-sm text-blue-100 transition hover:text-white"
+                    title="Area personale"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {user.name}{' '}
+                    <span className="rounded bg-blue-900 px-2 py-0.5 text-xs">
+                      {user.role}
+                    </span>
+                  </NavLink>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setShowLogoutConfirm(true);
+                  }}
+                  className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium transition hover:bg-blue-500"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </nav>
 

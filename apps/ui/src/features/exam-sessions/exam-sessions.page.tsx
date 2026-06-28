@@ -92,7 +92,7 @@ export function ExamSessionsPage() {
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold text-slate-800">Sessioni d'esame</h1>
         {isSegreteria && (
           <button
@@ -121,7 +121,7 @@ export function ExamSessionsPage() {
                   </h2>
                   <p className="text-sm text-slate-500">{group.description}</p>
                 </div>
-                <div className="overflow-hidden rounded-xl bg-white shadow">
+                <div className="overflow-x-auto rounded-xl bg-white shadow">
                   <table className="w-full text-left text-sm">
                     <thead className="bg-slate-100 text-slate-600">
                       <tr>

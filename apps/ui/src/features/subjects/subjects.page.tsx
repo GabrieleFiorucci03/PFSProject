@@ -46,7 +46,7 @@ export function SubjectsPage() {
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Insegnamenti</h1>
           {!isSegreteria && (
@@ -69,7 +69,7 @@ export function SubjectsPage() {
           Nessun insegnamento da mostrare.
         </p>
       ) : (
-        <div className="overflow-hidden rounded-xl bg-white shadow">
+        <div className="overflow-x-auto rounded-xl bg-white shadow">
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-100 text-slate-600">
               <tr>

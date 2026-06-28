@@ -123,7 +123,7 @@ export function ExamsPage() {
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Esami</h1>
           {!isSegreteria && (
@@ -153,7 +153,7 @@ export function ExamsPage() {
               <h2 className="mb-2 text-lg font-semibold text-slate-700">
                 {group.name}
               </h2>
-              <div className="overflow-hidden rounded-xl bg-white shadow">
+              <div className="overflow-x-auto rounded-xl bg-white shadow">
                 <table className="w-full text-left text-sm">
                   <thead className="bg-slate-100 text-slate-600">
                     <tr>

@@ -161,7 +161,7 @@ export function EditExamPage() {
           />
         </div>
 
-        <div className="flex gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row">
           <div className="flex flex-1 flex-col gap-1">
             <label
               htmlFor="startHour"
@@ -201,7 +201,7 @@ export function EditExamPage() {
           </div>
         </div>
 
-        <div className="flex gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row">
           <div className="flex flex-1 flex-col gap-1">
             <label htmlFor="type" className="text-sm font-medium text-slate-700">
               Tipo
