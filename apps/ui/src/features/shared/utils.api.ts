@@ -24,6 +24,18 @@ export function getAuthHeaders(): HeadersInit {
  * Va chiamata SOLO quando `response.ok` è false; lancia sempre.
  */
 export async function handleApiError(response: Response): Promise<never> {
+  // 401 su una rotta protetta = token mancante o scaduto (il JWT dura 24h):
+  // pulisce la sessione salvata e riporta al login, invece di lasciare l'utente
+  // "loggato" davanti a errori generici. Il login è escluso: lì il 401 significa
+  // "credenziali errate" e va mostrato nel form, non trasformato in redirect.
+  // (Chiavi localStorage scritte da auth.api.ts: non si importa logout() da lì
+  // per non creare un import circolare auth.api <-> utils.api.)
+  if (response.status === 401 && !response.url.endsWith('/auth/login')) {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('current_user');
+    window.location.assign('/login');
+  }
+
   let message = `Errore ${response.status}`;
   try {
     const body = await response.json();
