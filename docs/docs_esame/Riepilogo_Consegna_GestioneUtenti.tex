@@ -1,0 +1,1079 @@
+\documentclass[11pt,a4paper]{article}
+
+% ====================================================================
+%  Riepilogo consegna -- Gestione Utenti (sola visualizzazione)
+%  Esame "Progettazione Full Stack" (Prof. Bianchini, UniBS)
+%  Appello 20260629
+%  Versione LaTeX del documento di studio.
+%
+%  Compilazione consigliata: pdflatex (2 passate per indice/riferimenti).
+% ====================================================================
+
+% ----------------------------- Pacchetti ----------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[italian]{babel}
+\usepackage[a4paper,margin=2.4cm]{geometry}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{seqsplit}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{parskip}
+\usepackage[hidelinks,colorlinks=true,linkcolor=black!70,urlcolor=blue!60!black]{hyperref}
+
+% ----------------------------- Colori -------------------------------
+\definecolor{codebg}{RGB}{248,248,248}
+\definecolor{codeframe}{RGB}{220,220,220}
+\definecolor{codekw}{RGB}{0,90,160}
+\definecolor{codestr}{RGB}{160,60,30}
+\definecolor{codecom}{RGB}{100,120,100}
+\definecolor{codenum}{RGB}{120,120,120}
+\definecolor{accent}{RGB}{40,70,120}
+\definecolor{okgreen}{RGB}{30,130,60}
+\definecolor{kored}{RGB}{180,40,40}
+
+% ------------------------- Stili dei titoli -------------------------
+\titleformat{\section}{\Large\bfseries\color{accent}}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\large\bfseries\color{accent!85!black}}{\thesubsection}{0.6em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries}{\thesubsubsection}{0.6em}{}
+
+% ------------------------- Intestazioni -----------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small Gestione Utenti --- sola visualizzazione}
+\rhead{\small Appello 20260629}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% --------------------- Listings: stile generico ---------------------
+\lstdefinelanguage{TypeScriptX}{
+  morekeywords={
+    import, from, export, const, let, var, function, async, await,
+    return, if, else, for, while, interface, type, enum, class,
+    extends, implements, public, private, readonly, new, void,
+    Promise, string, number, boolean, null, undefined, true, false,
+    useState, useEffect, useNavigate, this, default, throw
+  },
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]',
+  morestring=[b]",
+  morestring=[b]`
+}
+
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{codeframe},
+  keywordstyle=\color{codekw}\bfseries,
+  stringstyle=\color{codestr},
+  commentstyle=\color{codecom}\itshape,
+  numberstyle=\tiny\color{codenum},
+  numbers=left,
+  numbersep=8pt,
+  showstringspaces=false,
+  breaklines=true,
+  breakatwhitespace=false,
+  columns=fullflexible,
+  keepspaces=true,
+  tabsize=2,
+  extendedchars=true,
+  literate=%
+    {à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1 {ò}{{\`o}}1 {ù}{{\`u}}1
+    {À}{{\`A}}1 {È}{{\`E}}1 {É}{{\'E}}1 {ç}{{\c c}}1
+    {👤}{{[user]}}1 {🚧}{{[WIP]}}1 {✅}{{Si}}1
+}
+
+% Stile "diagramma" per i blocchi ASCII (WebML)
+\lstdefinestyle{diagram}{
+  basicstyle=\ttfamily\scriptsize,
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{codeframe},
+  numbers=none,
+  keywordstyle=\relax,
+  commentstyle=\relax,
+  stringstyle=\relax,
+  breaklines=false,
+  columns=fullflexible,
+  keepspaces=true,
+  extendedchars=true,
+  literate=%
+    {à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1 {ò}{{\`o}}1 {ù}{{\`u}}1
+}
+
+% Comandi abbreviati
+% \file: percorsi di file -- spezzabili a fine riga (seqsplit) per non sforare il margine.
+\newcommand{\file}[1]{\texttt{\small\seqsplit{#1}}}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\si}{\textcolor{okgreen}{\textbf{S\`i}}}
+
+% ====================================================================
+\begin{document}
+
+% --------------------------- Frontespizio ---------------------------
+\begin{titlepage}
+\centering
+\vspace*{2cm}
+{\Huge\bfseries\color{accent} Gestione Utenti\par}
+\vspace{0.4cm}
+{\Large (sola visualizzazione)\par}
+\vspace{1.5cm}
+{\large Riepilogo della consegna\par}
+\vspace{0.6cm}
+{\large Esame ``Progettazione Full Stack''\par}
+{\large Prof.\ Bianchini --- UniBS\par}
+\vspace{0.4cm}
+{\large Appello \textbf{20260629}\par}
+\vfill
+\begin{minipage}{0.85\textwidth}
+\small\itshape
+Documento di studio: raccoglie \textbf{tutte} le modifiche fatte rispetto al
+progetto originale per soddisfare i tre esercizi della consegna.
+\end{minipage}
+\vfill
+{\large \today\par}
+\end{titlepage}
+
+% Tolleranza di impaginazione leggermente più alta: evita stringhe tt che
+% sforano nel margine (a scapito di spazi tra parole talvolta più ampi).
+\sloppy
+
+\tableofcontents
+\newpage
+
+% ====================================================================
+\section{La consegna in breve}
+
+Introdurre la \textbf{gestione utenti limitata alla sola visualizzazione}
+degli utenti registrati:
+
+\begin{itemize}[leftmargin=1.4em]
+  \item Pagina accessibile \textbf{solo agli ADMIN}.
+  \item Tabella con colonne \textbf{id, name, email, role}.
+  \item Pulsanti \textbf{Nuovo / Modifica / Elimina} (con conferma sulla cancellazione).
+  \item Stile uguale alle pagine libri/autori/categorie già esistenti.
+  \item Le pagine di \textbf{insert/edit NON sono richieste} (la cancellazione era
+        opzionale, ma è stata comunque implementata e funzionante).
+\end{itemize}
+
+\paragraph{I tre esercizi.}
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{Esercizio 1} --- modello ipertestuale \textbf{WebML} della pagina.
+  \item \textbf{Esercizio 2} --- rotta \textbf{backend NestJS} che espone gli utenti.
+  \item \textbf{Esercizio 3} --- pagina \textbf{frontend React}.
+\end{enumerate}
+
+\paragraph{Architettura del progetto.}
+Monorepo \textbf{Nx}, con \file{apps/api} (NestJS), \file{apps/ui}
+(React + Vite), e librerie \file{libs/server/\{auth,users,books,security\}}.
+
+% ====================================================================
+\section{Esercizio 1 --- Modello WebML (documentazione)}
+
+\textbf{File creato:} \file{Appello\_20260629/docs/Esercizio1\_WebML\_GestioneUtenti.md}
+
+Questo esercizio è solo documentale: non tocca il codice, ma \textbf{giustifica}
+le scelte di Es.2 ed Es.3 tramite il modello ipertestuale WebML. Di seguito il
+contenuto \textbf{integrale} del documento.
+
+\begin{quote}\small\itshape
+Progettazione model-driven dei contenuti ipertestuali (WebML).
+Riferimenti: slide L9 (notazione) e L10 (running example ``Area libri'' +
+mapping all'implementazione).
+\end{quote}
+
+% --------------------------------------------------------------------
+\subsection{Premesse e requisiti}
+
+Dall'analisi dei requisiti (consegna):
+
+\begin{itemize}[leftmargin=1.4em]
+  \item Funzionalità di \textbf{gestione utenti}, limitata alla \textbf{sola
+        visualizzazione} degli utenti registrati.
+  \item Accesso consentito \textbf{solo agli amministratori} $\rightarrow$ la
+        pagina appartiene alla \textbf{site view privata dell'amministratore}
+        (area \emph{privata}: accesso tramite autenticazione + autorizzazione di
+        ruolo \code{ADMIN}).
+  \item La pagina mostra una \textbf{tabella} con \code{id}, \code{nome}
+        (\code{name}), \code{email}, \code{ruolo} (\code{role}).
+  \item Sono presenti i \textbf{pulsanti} per: inserimento nuovo utente, modifica
+        utente, cancellazione (con conferma).
+  \item Le pagine di inserimento/modifica \textbf{non} sono realizzate (i relativi
+        link puntano a pagine non ancora sviluppate). La cancellazione è opzionale.
+\end{itemize}
+
+\textbf{Entità coinvolta} (dal modello dei dati):
+\code{User(id, name, email, passwordHash, role)}.
+Nella pubblicazione ipertestuale l'attributo \code{passwordHash} \textbf{non}
+viene mai esposto.
+
+% --------------------------------------------------------------------
+\subsection{Progetto coarse --- Area Utenti}
+
+Si individua una nuova \textbf{area} coesa, dedicata alla gestione degli utenti,
+all'interno della site view privata dell'amministratore (analoga alle aree
+``libri'', ``autori'', ``categorie'').
+
+\begin{lstlisting}[style=diagram]
+:................................................:
+: Area Utenti                                    :
+:------------------------------------------------:
+: Core   (User)                                  :
+: Delete (User)            <-- opzionale         :
+: [Create (User)]          <-- pagina non realizzata
+: [Modify (User)]          <-- pagina non realizzata
+:................................................:
+\end{lstlisting}
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Core(User)}: pubblicazione dei contenuti dell'entità core
+        \code{User} $\rightarrow$ richiesta dell'esercizio.
+  \item \textbf{Delete(User)}: operazione CUD di cancellazione (opzionale).
+  \item \textbf{Create(User) / Modify(User)}: previste come funzioni dell'area, ma
+        \textbf{non realizzate} in questo esercizio (i pulsanti sono comunque
+        mostrati e i link puntano alle relative pagine).
+\end{itemize}
+
+\textbf{Visibilità dell'area:} \emph{privata} (accesso previa autenticazione e con
+ruolo \code{ADMIN}).
+
+% --------------------------------------------------------------------
+\subsection{Progetto dettagliato --- suddivisione in pagine}
+
+L'area si suddivide nelle seguenti pagine (solo la prima è realizzata in questo
+esercizio):
+
+\begin{lstlisting}[style=diagram]
+:..........................:   :..........................:   :..........................:
+: Lista Utenti          [L] :   : Crea Utente           [L] :   : Modifica Utente          :
+:--------------------------:   :--------------------------:   :--------------------------:
+: Core   (User)            :   : Create (User)            :   : Modify (User)            :
+: Delete (User)            :   : (non realizzata)         :   : (non realizzata)         :
+:..........................:   :..........................:   :..........................:
+\end{lstlisting}
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Lista Utenti} --- pagina \textbf{Landmark \code{[L]}}: globalmente
+        visibile, raggiungibile da ogni altra pagina della site view tramite la
+        \emph{navbar} (voce ``Utenti''). È la pagina oggetto dell'esercizio.
+  \item \textbf{Crea Utente} / \textbf{Modifica Utente}: pagine non realizzate
+        (placeholder di destinazione dei link).
+\end{itemize}
+
+% --------------------------------------------------------------------
+\subsection{Specifica di dettaglio della pagina «Lista Utenti»}
+
+\subsubsection{Diagramma WebML}
+
+\begin{lstlisting}[style=diagram]
+                         PAGINA: Lista Utenti  [L]
+   .............................................................................
+   :                                                                           :
+   :     +-----------------------------+                                       :
+   :     |        UtentiUnit           |                                       :
+   :     |   [::] MultipleDetails      |----- (modifica) userID ---------------+--->  PAGINA
+   :     |                             |   link contestuale                    :     Modifica Utente
+   :     |          User               |                                       :     ( User[ID==?] )
+   :     |  (id, name, email, role)    |                                       :
+   :     +-----------------------------+                                       :
+   :            |              \                                               :
+   :            |               \  (elimina) userID                            :
+   :            |                \  normal link                                :
+   :            |                 v                                            :
+   :            |          +-------------+      OK (verde)                      :
+   :            |          |   Delete    |---------------------> [refresh]      :
+   :            |          |   ( - )     |        ricarica la pagina Lista Utenti
+   :            |          |   User      |---------------------> ErrorPage      :
+   :            |          +-------------+      KO (rosso)                      :
+   :            |                                                              :
+   :  (nuovo utente) link non contestuale                                      :
+   :            +-------------------------------------------------------------+--->  PAGINA
+   :                                                                           :     Crea Utente
+   :...........................................................................:
+
+   LEGENDA
+   [::] MultipleDetails unit   ( - ) Delete operation unit
+   --->  link               ----- link contestuale (trasporta userID)
+   OK = link verde (successo)   KO = link rosso (fallimento)
+\end{lstlisting}
+
+\subsubsection{View component --- \texttt{UtentiUnit} (MultipleDetails)}
+
+Si usa una \textbf{MultipleDetails unit} perché la pagina pubblica \textbf{un
+insieme di istanze} dell'entità \code{User}, mostrando per ciascuna più attributi
+contemporaneamente (la tabella).
+
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{>{\bfseries}p{4.2cm} X}
+\toprule
+\normalfont Proprietà & Valore \\
+\midrule
+Tipo unità & \textbf{MultipleDetails} \\
+Contenitore (sorgente) & entità \code{User} \\
+Selettore & \emph{nessuno} $\rightarrow$ tutte le istanze (l'admin vede tutti gli utenti) \\
+Attributi pubblicati & \code{id}, \code{name}, \code{email}, \code{role} (mai \code{passwordHash}) \\
+Parametri in input & nessuno \\
+Parametri in output & l'insieme degli \code{\{id\}} degli utenti pubblicati; \code{userID} della riga selezionata per i link \\
+\bottomrule
+\end{tabularx}
+
+\subsubsection{Operazione --- \texttt{Delete(User)} (opzionale)}
+
+\begin{tabularx}{\textwidth}{>{\bfseries}p{3.6cm} X}
+\toprule
+\normalfont Proprietà & Valore \\
+\midrule
+Tipo & \textbf{Delete} operation unit \\
+Entità & \code{User} \\
+Normal link (in) & dalla \code{UtentiUnit}, trasporta lo \code{userID} dell'utente da eliminare \\
+Link OK (verde) & torna a \textbf{Lista Utenti} (ricalcolo/refresh della MultipleDetails) \\
+Link KO (rosso) & va a \textbf{ErrorPage} \\
+\bottomrule
+\end{tabularx}
+
+\medskip
+La conferma (``con conferma'') è modellata come interazione che precede
+l'attivazione del \emph{normal link} verso l'operazione \code{Delete}.
+
+\subsubsection{Link uscenti dalla pagina}
+
+\begin{tabularx}{\textwidth}{>{\bfseries}p{2.6cm} p{3.6cm} p{3.4cm} X}
+\toprule
+\normalfont Pulsante & \normalfont Tipo di link & \normalfont Destinazione & \normalfont Contesto trasportato \\
+\midrule
+Nuovo utente & link \textbf{non contestuale} & pagina Crea Utente & nessuno \\
+Modifica & link \textbf{contestuale} & pagina Modifica Utente & \code{userID} ($\rightarrow$ \code{User[ID==?]}) \\
+Elimina & \textbf{normal link} verso operazione Delete & Delete(User) & \code{userID} \\
+\bottomrule
+\end{tabularx}
+\renewcommand{\arraystretch}{1}
+
+% --------------------------------------------------------------------
+\subsection{Layout di pagina (navbar + utente corrente)}
+
+Come nel running example, il \textbf{Layout page} è un modulo \code{[M]} globale
+che definisce navbar e informazioni sull'utente autenticato. La voce di menu
+\textbf{``Utenti''} (verso la pagina \emph{Lista Utenti} landmark) è visibile
+\textbf{solo} se l'utente corrente ha ruolo \code{ADMIN}.
+
+\begin{lstlisting}[style=diagram]
+:..............................:
+: Layout page              [M] :
+:------------------------------:
+:   ( ) CurrentUser            :
+:        |                     :
+:        v                     :
+:   [=] User [ID==?]           :   (Details dell'utente loggato, mostrato in navbar)
+:..............................:
+   navbar -> { Catalogo | Autori | Categorie | **Utenti (solo ADMIN)** | Logout }
+\end{lstlisting}
+
+% --------------------------------------------------------------------
+\subsection{Mapping verso l'implementazione (coerente con L10)}
+
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{5.2cm} X}
+\toprule
+\textbf{Costrutto WebML} & \textbf{Implementazione} \\
+\midrule
+Pagina \emph{Lista Utenti} & componente React \file{users.page.tsx} \\
+View component \emph{UtentiUnit} (visualizz.) & tabella renderizzata nel componente React \\
+Caricamento dati dal backend & funzione \code{fetchUsers()} in \file{users.api.ts} $\rightarrow$ \code{GET /api/users} (solo ADMIN) \\
+Operazione \emph{Delete(User)} & funzione \code{deleteUser(id)} in \file{users.api.ts} $\rightarrow$ \code{DELETE /api/users/:id} \\
+Link automatico (rendering) & \code{useEffect} che invoca \code{fetchUsers()} al mount \\
+Pagina landmark \emph{Utenti} & voce della \textbf{navbar} nel \file{app-layout.tsx} (visibile solo agli ADMIN) \\
+Link contestuale \emph{Modifica} & \code{navigate('/users/:id/edit')} \\
+Link non contestuale \emph{Nuovo utente} & \code{navigate('/users/new')} \\
+ErrorPage (link KO) & gestione dello stato \code{error} nel componente \\
+\bottomrule
+\end{tabularx}
+\renewcommand{\arraystretch}{1}
+
+% ====================================================================
+\section{Esercizio 2 --- Backend NestJS}
+
+\textbf{Obiettivo:} esporre la lista utenti \textbf{senza mai restituire
+\code{passwordHash}}, su una rotta protetta accessibile solo agli ADMIN (la rotta
+\code{GET /api/users} già esisteva).
+
+% --------------------------------------------------------------------
+\subsection{Nuova interfaccia \texttt{UserListItem} (FILE NUOVO)}
+
+\file{libs/server/users/src/lib/interfaces/user-list-item.interface.ts}
+
+\begin{lstlisting}[language=TypeScriptX]
+import { UserRole } from '../dto/user-role.enum';
+
+/**
+ * Proiezione "sicura" di un utente per la pubblicazione ipertestuale
+ * (View component UtentiUnit dell'Esercizio 1): espone solo gli attributi
+ * mostrati nella tabella, escludendo sempre `passwordHash`.
+ */
+export interface UserListItem {
+  id: number;
+  name: string;
+  email: string;
+  role: UserRole;
+}
+\end{lstlisting}
+
+\textbf{Perché:} è la ``proiezione sicura'' dell'entità utente. Definisce un tipo
+che contiene \textbf{solo} i campi mostrati in tabella, garantendo a livello di
+tipo che \code{passwordHash} non venga propagato verso il frontend.
+
+% --------------------------------------------------------------------
+\subsection{Export dell'interfaccia (MODIFICA)}
+
+\file{libs/server/users/src/index.ts} --- aggiunta l'ultima riga:
+
+\begin{lstlisting}[language=TypeScriptX]
+export * from './lib/users.module';
+export * from './lib/users.service';
+export * from './lib/users.repository';
+export * from './lib/user.entity';
+export * from './lib/dto/user-role.enum';
+export * from './lib/dto/create-user.dto';
+export * from './lib/dto/update-user.dto';
+export * from './lib/interfaces/user-list-item.interface';   // <-- AGGIUNTA
+\end{lstlisting}
+
+\textbf{Perché:} rende \code{UserListItem} importabile sia dal backend sia dal
+frontend (\code{import \{ UserListItem \} from '@server/users'}), così client e
+server condividono lo stesso contratto di tipo.
+
+% --------------------------------------------------------------------
+\subsection{Mapping in \texttt{getUsers()} (MODIFICA)}
+
+\file{libs/server/users/src/lib/users.service.ts}
+
+\begin{lstlisting}[language=TypeScriptX]
+import { UserListItem } from './interfaces/user-list-item.interface';   // <-- import aggiunto
+
+async getUsers(role?: UserRole): Promise<UserListItem[]> {              // <-- tipo di ritorno cambiato
+    const users = await this.usersRepository.findAll(role);
+
+    if (role && users.length === 0) {
+        throw new NotFoundException(`No users found with role ${role}`);
+    }
+
+    // Mapping verso la proiezione "sicura": non esporre mai passwordHash.
+    return users.map(({ id, name, email, role }) => ({ id, name, email, role }));   // <-- AGGIUNTA
+}
+\end{lstlisting}
+
+\textbf{Perché:} prima il metodo restituiva le entità complete (incluso
+\code{passwordHash}). Ora il \code{.map()} estrae solo i quattro campi previsti
+$\rightarrow$ la rotta non espone più dati sensibili.
+
+% --------------------------------------------------------------------
+\subsection{Quadro completo delle rotte del controller utenti}
+
+\file{libs/server/users/src/lib/users.controller.ts} --- il controller è montato su
+\code{@Controller('users')} e il prefisso globale dell'app è \code{/api}, quindi
+tutte le rotte vivono sotto \code{/api/users}. Ecco \textbf{ogni rotta} con le
+relative protezioni:
+
+\renewcommand{\arraystretch}{1.3}
+\small
+\begin{longtable}{>{\ttfamily}p{2.9cm} p{2.4cm} p{1.9cm} p{3.2cm} p{2.2cm}}
+\toprule
+\normalfont\textbf{Metodo + path} & \textbf{Guardie} & \textbf{Ruoli ammessi} & \textbf{Cosa fa} & \textbf{Usata?} \\
+\midrule
+\endhead
+GET /users (opz. ?role=) & JwtAuthGuard, RolesGuard & \textbf{ADMIN} & Lista utenti (proiezione sicura \code{UserListItem[]}) & \si{} --- alimenta la tabella \\
+GET /users/me & JwtAuthGuard & qualsiasi loggato & Restituisce l'utente corrente dal token & indirettamente (navbar) \\
+GET /users/interns & nessuna & pubblica & Placeholder (``API non implementata'') & no \\
+GET /users/:id & JwtAuthGuard, RolesGuard & ADMIN, USER & Dettaglio singolo utente & no \\
+POST /users & nessuna & pubblica & Crea utente (accetta \code{role}) & no (preesistente) \\
+PATCH /users/:id & JwtAuthGuard, RolesGuard & ADMIN & Aggiorna utente & no \\
+DELETE /users/:id & JwtAuthGuard, RolesGuard & ADMIN & Cancella utente & \si{} --- pulsante ``Elimina'' \\
+\bottomrule
+\end{longtable}
+\normalsize
+\renewcommand{\arraystretch}{1}
+
+\begin{quote}\small
+\textbf{Importante:} l'ordine di dichiarazione conta. \code{GET /users/me} e
+\code{GET /users/interns} sono dichiarati \textbf{prima} di \code{GET /users/:id},
+altrimenti \code{:id} catturerebbe anche \code{me}/\code{interns} interpretandoli
+come id.
+\end{quote}
+
+\textbf{Le due rotte effettivamente sfruttate dalla pagina:}
+
+\begin{lstlisting}[language=TypeScriptX]
+// 1) Lettura della lista (tabella)
+@Get() // GET /api/users  oppure  /api/users?role=value
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN)
+@ApiBearerAuth()
+@ApiQuery({ name: 'role', required: false, enum: UserRole })
+getUsers(@Query('role', new ParseEnumPipe(UserRole, { optional: true })) role?: UserRole) {
+    return this.serverUsersService.getUsers(role);
+}
+
+// 2) Cancellazione (pulsante Elimina)
+@Delete(':id') // DELETE /api/users/:id
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN)
+@ApiBearerAuth()
+removeUser(@Param('id', ParseIntPipe) id: number) {
+    return this.serverUsersService.removeUser(id);
+}
+\end{lstlisting}
+
+\textbf{Come funziona la protezione (catena di guardie):}
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item \code{JwtAuthGuard} --- legge l'header \code{Authorization: Bearer <token>},
+        valida il JWT e popola \code{request.user}. Senza token valido
+        $\rightarrow$ \textbf{401 Unauthorized}.
+  \item \code{RolesGuard} --- legge i ruoli richiesti impostati dal decoratore
+        \code{@Roles(...)} (via metadata Reflector) e li confronta con il ruolo
+        dell'utente nel token. Se non combaciano $\rightarrow$ \textbf{403 Forbidden}.
+  \item \code{@Roles(UserRole.ADMIN)} --- non esegue logica: \textbf{annota} la rotta
+        con i ruoli ammessi, che \code{RolesGuard} poi legge. È il pezzo che impone
+        ``solo ADMIN''.
+  \item \code{@ApiBearerAuth()} / \code{@ApiQuery(...)} --- solo documentazione
+        Swagger, nessun effetto a runtime.
+\end{enumerate}
+
+\textbf{Pipe sui parametri:}
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \code{ParseIntPipe} su \code{:id} $\rightarrow$ converte e valida che l'id
+        sia un intero (altrimenti 400).
+  \item \code{ParseEnumPipe(UserRole, \{ optional: true \})} sul query \code{role}
+        $\rightarrow$ accetta solo valori validi dell'enum, ed è opzionale.
+\end{itemize}
+
+\textbf{Flusso completo di una richiesta \code{GET /api/users} (end-to-end):}
+
+\begin{lstlisting}[style=diagram]
+UsersPage (useEffect)
+   -> fetchUsers()                       [users.api.ts]
+   -> GET /api/users  + Bearer token
+        -> JwtAuthGuard  (valida token, set request.user)
+        -> RolesGuard    (richiede ADMIN)
+        -> ServerUsersController.getUsers()
+        -> ServerUsersService.getUsers()  [mappa a UserListItem, niente passwordHash]
+        -> UsersRepository.findAll()
+   <- JSON: UserListItem[]
+   -> setUsers(...)  -> render tabella
+\end{lstlisting}
+
+% ====================================================================
+\section{Esercizio 3 --- Frontend React}
+
+\textbf{Obiettivo:} nuova pagina \code{/users} (solo ADMIN) con tabella e pulsanti,
+in stile identico alle altre pagine.
+
+% --------------------------------------------------------------------
+\subsection{API client (FILE NUOVO)}
+
+\file{apps/ui/src/features/users/users.api.ts}
+
+\textbf{Codice completo del file (fedele all'originale):}
+
+\begin{lstlisting}[language=TypeScriptX]
+import { UserListItem } from '@server/users';
+import { handleApiError } from '../shared/utils.api';
+
+const API_URL = 'http://localhost:3333/api';
+
+function getAuthHeaders() {
+    const token = localStorage.getItem('access_token');
+
+    return {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+    };
+}
+
+export async function fetchUsers(): Promise<UserListItem[]> {
+    const response = await fetch(`${API_URL}/users`, {
+        headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+        await handleApiError(response);
+    }
+
+    return response.json();
+}
+
+export async function deleteUser(id: number): Promise<void> {
+    const response = await fetch(`${API_URL}/users/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+        await handleApiError(response);
+    }
+}
+\end{lstlisting}
+
+\textbf{Perché:} centralizza le chiamate HTTP (con token JWT negli header) e riusa
+il tipo \code{UserListItem} esportato dal backend. Coerente con gli altri
+\file{*.api.ts}.
+
+% --------------------------------------------------------------------
+\subsection{Pagina elenco utenti (FILE NUOVO)}
+
+\file{apps/ui/src/features/users/users.page.tsx}
+
+\textbf{Punti chiave:}
+\begin{itemize}[leftmargin=1.4em]
+  \item Carica gli utenti con \code{fetchUsers()} dentro un \code{useEffect},
+        gestendo gli stati \code{loading} / \code{error}.
+  \item Tabella con colonne \textbf{Id / Nome / Email / Ruolo / Azioni}.
+  \item Pulsante \textbf{``Nuovo utente''} $\rightarrow$ naviga a \code{/users/new}.
+  \item Pulsante \textbf{``Modifica''} per riga $\rightarrow$ naviga a
+        \code{/users/:id/edit}.
+  \item Pulsante \textbf{``Elimina''} per riga $\rightarrow$ \code{window.confirm}
+        di conferma, poi \code{deleteUser(id)} e aggiornamento ottimistico della
+        lista (\code{filter}).
+  \item Stile riutilizzato da \file{../css/books.module.css}.
+\end{itemize}
+
+\textbf{Codice completo del file:}
+
+\begin{lstlisting}[language=TypeScriptX]
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import clsx from 'clsx';
+import book_styles from '../css/books.module.css';
+import { UserListItem } from '@server/users';
+import { deleteUser, fetchUsers } from './users.api';
+
+export function UsersPage() {
+  const navigate = useNavigate();
+  const [users, setUsers] = useState<UserListItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchUsers()
+      .then(setUsers)
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  async function handleDelete(id: number) {
+    const confirmed = window.confirm('Vuoi davvero cancellare questo utente?');
+
+    if (!confirmed) return;
+
+    try {
+      await deleteUser(id);
+      setUsers((current) => current.filter((user) => user.id !== id));
+    } catch (err: any) {
+      setError(err.message);
+    }
+  }
+
+  if (loading) {
+    return (
+      <main className={book_styles.page}>
+        <section className={book_styles.card}>
+          <p className={book_styles.message}>Caricamento utenti...</p>
+        </section>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className={book_styles.page}>
+        <section className={book_styles.card}>
+          <p className={book_styles.error}>{error}</p>
+        </section>
+      </main>
+    );
+  }
+
+  return (
+    <main className={book_styles.page}>
+      <section className={clsx(book_styles.card, book_styles.cardLarge)}>
+        <header className={book_styles.header}>
+          <h1 className={book_styles.title}>👤 Utenti</h1>
+          <p className={book_styles.subtitle}>
+            Elenco degli utenti registrati nella libreria.
+          </p>
+        </header>
+
+        <button
+          className={book_styles.button}
+          onClick={() => navigate('/users/new')}
+        >
+          Nuovo utente
+        </button>
+
+        {users.length === 0 ? (
+          <p className={book_styles.message}>Nessun utente disponibile.</p>
+        ) : (
+          <div className={book_styles.tableWrapper}>
+            <table className={book_styles.table}>
+              <thead>
+                <tr>
+                  <th className={book_styles.th}>Id</th>
+                  <th className={book_styles.th}>Nome</th>
+                  <th className={book_styles.th}>Email</th>
+                  <th className={book_styles.th}>Ruolo</th>
+                  <th className={book_styles.th}>Azioni</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {users.map((user) => (
+                  <tr key={user.id} className={book_styles.row}>
+                    <td className={book_styles.td}>{user.id}</td>
+                    <td className={book_styles.titleCell}>{user.name}</td>
+                    <td className={book_styles.td}>{user.email}</td>
+                    <td className={book_styles.td}>{user.role}</td>
+                    <td className={book_styles.td}>
+                      <button
+                        className={book_styles.secondaryButton}
+                        onClick={() => navigate(`/users/${user.id}/edit`)}
+                      >
+                        Modifica
+                      </button>
+
+                      <button
+                        className={book_styles.dangerButton}
+                        onClick={() => handleDelete(user.id)}
+                      >
+                        Elimina
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+    </main>
+  );
+}
+\end{lstlisting}
+
+\textbf{Spiegazione riga per riga delle scelte:}
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \code{const [users, setUsers] = useState<UserListItem[]>([])} --- lo stato è
+        \textbf{tipizzato} con il contratto condiviso \code{UserListItem}: il
+        compilatore garantisce che si accede solo a \code{id/name/email/role}.
+  \item \code{useEffect(..., [])} con array di dipendenze vuoto $\rightarrow$ il
+        fetch parte \textbf{una sola volta} al montaggio del componente.
+  \item \code{.then(setSomething).catch(...).finally(...)} $\rightarrow$ pattern a
+        tre stati (dati / errore / caricamento), identico alle altre pagine del
+        progetto.
+  \item \code{handleDelete} $\rightarrow$ \textbf{conferma} con \code{window.confirm}
+        (requisito della consegna), poi cancella sul server e infine aggiorna lo
+        stato locale con \code{filter((user) => user.id !== id)}
+        (\textbf{aggiornamento ottimistico}: non si rifà la fetch, si rimuove la
+        riga dallo stato).
+  \item Rendering condizionale: \code{loading} $\rightarrow$ messaggio; \code{error}
+        $\rightarrow$ messaggio d'errore; lista vuota $\rightarrow$ ``Nessun utente
+        disponibile''; altrimenti $\rightarrow$ tabella.
+  \item Le classi CSS (\code{page}, \code{card}, \code{cardLarge}, \code{table},
+        \code{th}, \code{td}, \code{titleCell}, \code{secondaryButton},
+        \code{dangerButton}, \ldots) sono \textbf{riusate} da
+        \file{books.module.css}, così lo stile è identico alle pagine
+        libri/autori/categorie.
+\end{itemize}
+
+\begin{quote}\small
+\textbf{Nota sull'evoluzione:} nella prima versione i pulsanti ``Nuovo'' e
+``Modifica'' erano \code{disabled} con \code{title="Funzione non disponibile"}. In
+un secondo momento sono stati resi cliccabili e fatti puntare alla paginetta
+``Funzione non implementata'' (vedi sezione successiva).
+\end{quote}
+
+% --------------------------------------------------------------------
+\subsection{Pagina ``Funzione non implementata'' (FILE NUOVO)}
+
+\file{apps/ui/src/features/users/user-not-implemented.page.tsx}
+
+\begin{lstlisting}[language=TypeScriptX]
+import { useNavigate } from 'react-router-dom';
+import clsx from 'clsx';
+import book_styles from '../css/books.module.css';
+
+export function UserNotImplementedPage() {
+  const navigate = useNavigate();
+  return (
+    <main className={book_styles.page}>
+      <section className={clsx(book_styles.card, book_styles.cardSmall)}>
+        <h1 className={book_styles.title}>🚧 Funzione non implementata</h1>
+        <p className={book_styles.message}>
+          La creazione e la modifica degli utenti non sono ancora disponibili.
+          La gestione utenti è attualmente limitata alla sola visualizzazione.
+        </p>
+        <button className={book_styles.button} onClick={() => navigate('/users')}>
+          Torna agli utenti
+        </button>
+      </section>
+    </main>
+  );
+}
+\end{lstlisting}
+
+\textbf{Perché:} la consegna non richiede insert/edit. Invece di lasciare pulsanti
+morti, i pulsanti Nuovo/Modifica portano a questa pagina che dichiara
+esplicitamente che la funzione non è implementata, mantenendo la UX coerente.
+
+% --------------------------------------------------------------------
+\subsection{Rotte (MODIFICA)}
+
+\file{apps/ui/src/app/app.tsx} --- sono stati aggiunti \textbf{2 import} e
+\textbf{3 rotte} (le righe marcate \code{// <-- AGGIUNTA}). Di seguito il
+\textbf{file completo} per vedere le rotte nel loro contesto:
+
+\begin{lstlisting}[language=TypeScriptX]
+import { BooksPage } from '../features/books/books.page';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { LoginPage } from '../features/auth/login.page';
+import { ProtectedRoute } from '../features/auth/protected-route';
+import { LogoutPage } from '../features/auth/logout.page';
+import { CreateBookPage } from '../features/books/create-book.page';
+import { EditBookPage } from '../features/books/edit-book.page';
+import { AppLayout } from '../features/layouts/app-layout';
+import { HomeModulePage } from '../features/books/home-module.page';
+import { HomeTailwindPage } from '../features/books/home-tailwind.page';
+import { HomeBootstrapPage } from '../features/books/home-bootstrap.page';
+import { AuthorsPage } from '../features/authors/authors.page';
+import { CreateAuthorPage } from '../features/authors/create-author.page';
+import { EditAuthorPage } from '../features/authors/edit-author.page';
+import { CategoriesPage } from '../features/categories/categories.page';
+import { CreateCategoryPage } from '../features/categories/create-category.page';
+import { EditCategoryPage } from '../features/categories/edit-category.page';
+import { UsersPage } from '../features/users/users.page';                              // <-- AGGIUNTA
+import { UserNotImplementedPage } from '../features/users/user-not-implemented.page';  // <-- AGGIUNTA
+
+export function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/books" replace />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/logout" element={<LogoutPage />} />
+
+      <Route
+        element={
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="/books" element={<BooksPage />} />
+        <Route path="/books/new" element={<CreateBookPage />} />
+        <Route path="/books/:id/edit" element={<EditBookPage />} />
+        <Route path="/authors" element={<AuthorsPage />} />
+        <Route path="/authors/new" element={<CreateAuthorPage />} />
+        <Route path="/authors/:id/edit" element={<EditAuthorPage />} />
+        <Route path="/categories" element={<CategoriesPage />} />
+        <Route path="/categories/new" element={<CreateCategoryPage />} />
+        <Route path="/categories/:id/edit" element={<EditCategoryPage />} />
+        <Route path="/users" element={<UsersPage />} />                       {/* <-- AGGIUNTA */}
+        <Route path="/users/new" element={<UserNotImplementedPage />} />      {/* <-- AGGIUNTA */}
+        <Route path="/users/:id/edit" element={<UserNotImplementedPage />} /> {/* <-- AGGIUNTA */}
+      </Route>
+
+      <Route path="/home-module" element={<HomeModulePage />} />
+      <Route path="/home-tailwind" element={<HomeTailwindPage />} />
+      <Route path="/home-bootstrap" element={<HomeBootstrapPage />} />
+    </Routes>
+  );
+}
+
+export default App;
+\end{lstlisting}
+
+\textbf{Perché:} le tre rotte utenti sono inserite \textbf{dentro} il blocco
+protetto da \code{<ProtectedRoute>\allowbreak<AppLayout/>\allowbreak</ProtectedRoute>} (richiedono login
+e mostrano la navbar). \code{/users/new} e \code{/users/:id/edit} riusano la stessa
+pagina ``non implementata''. Le rotte pubbliche (\code{/login}, \code{/logout}, le
+home demo) restano fuori dal blocco protetto.
+
+% --------------------------------------------------------------------
+\subsection{Voce di menu nella navbar (MODIFICA)}
+
+\file{apps/ui/src/features/layouts/app-layout.tsx} --- aggiunta la voce ``Utenti''
+nella sezione \code{navLinks} (riga marcata). Contesto del blocco modificato:
+
+\begin{lstlisting}[language=TypeScriptX]
+<div className={styles.navLinks}>
+  <button onClick={() => navigate('/books')}>Catalogo</button>
+  <button onClick={() => navigate('/books/new')}>Nuovo libro</button>
+  <button onClick={() => navigate('/authors')}>Autori</button>
+  <button onClick={() => navigate('/categories')}>Categorie</button>
+  {user?.role === 'ADMIN' && (                                      {/* <-- AGGIUNTA */}
+    <button onClick={() => navigate('/users')}>Utenti</button>      {/* <-- AGGIUNTA */}
+  )}                                                                {/* <-- AGGIUNTA */}
+
+  <div className={styles.userSection}>
+    {/* ... pulsante utente + dropdown logout (invariati) ... */}
+  </div>
+</div>
+\end{lstlisting}
+
+Il ruolo arriva dallo stato \code{user}, popolato al mount da
+\code{fetchCurrentUser()} (\code{GET /api/users/me}):
+
+\begin{lstlisting}[language=TypeScriptX]
+const [user, setUser] = useState(null);
+
+useEffect(() => {
+  fetchCurrentUser()
+    .then(setUser)
+    .catch((err) => setUser(null));
+}, []);
+\end{lstlisting}
+
+\textbf{Perché:} la voce ``Utenti'' compare nel menu \textbf{solo se l'utente
+loggato è ADMIN} (\code{user?.role === 'ADMIN'}), in linea con la consegna (pagina
+riservata agli ADMIN).
+
+% --------------------------------------------------------------------
+\subsection{Approfondimento --- come funziona il routing frontend}
+
+Le tre rotte utenti sono \textbf{annidate} dentro una rotta ``wrapper'' senza
+\code{path}:
+
+\begin{lstlisting}[language=TypeScriptX]
+<Route
+  element={
+    <ProtectedRoute>
+      <AppLayout />
+    </ProtectedRoute>
+  }
+>
+  {/* ... books, authors, categories ... */}
+  <Route path="/users" element={<UsersPage />} />
+  <Route path="/users/new" element={<UserNotImplementedPage />} />
+  <Route path="/users/:id/edit" element={<UserNotImplementedPage />} />
+</Route>
+\end{lstlisting}
+
+Cosa implica, passo per passo:
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{Rotta wrapper (layout route):} non ha \code{path}, serve solo a
+        raggruppare le rotte figlie e ad applicare loro lo stesso ``guscio''.
+  \item \code{<ProtectedRoute>} --- verifica l'autenticazione (presenza/validità del
+        token); se l'utente non è loggato reindirizza al login. Tutte le rotte
+        figlie ereditano questa protezione $\rightarrow$ \code{/users},
+        \code{/users/new}, \code{/users/:id/edit} sono \textbf{tutte} accessibili
+        solo da utenti autenticati.
+  \item \code{<AppLayout>} --- disegna la navbar e poi un \code{<Outlet/>}: è dentro
+        l'\code{Outlet} che React Router inietta la pagina figlia corrente. Per
+        questo la navbar resta fissa mentre cambia solo il contenuto.
+  \item \code{navigate(...)} --- la navigazione è programmatica (hook
+        \code{useNavigate}):
+        \begin{itemize}[leftmargin=1.2em]
+          \item \code{navigate('/users')} dalla navbar (solo ADMIN);
+          \item \code{navigate('/users/new')} dal pulsante ``Nuovo utente'';
+          \item \code{navigate('/users/\$\{user.id\}/edit')} dal pulsante
+                ``Modifica'' (URL dinamico con id);
+          \item \code{navigate('/users')} dal pulsante ``Torna agli utenti'' nella
+                pagina non implementata.
+        \end{itemize}
+  \item \code{:id} è un parametro dinamico: qualsiasi valore (\code{/users/7/edit},
+        \code{/users/42/edit}, \ldots) matcha la stessa rotta. Qui punta alla pagina
+        ``non implementata'', quindi l'id non viene letto; in una vera edit si
+        leggerebbe con \code{useParams()}.
+\end{enumerate}
+
+\textbf{Livelli di protezione per \code{/users} (tre livelli):}
+
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{>{\bfseries}p{2.6cm} p{4.6cm} X}
+\toprule
+\normalfont Livello & \normalfont Meccanismo & \normalfont Cosa blocca \\
+\midrule
+Navbar & \code{user?.role === 'ADMIN'} & nasconde il link ai non-ADMIN \\
+Frontend route & \code{<ProtectedRoute>} & blocca gli utenti non autenticati \\
+Backend & \code{JwtAuthGuard} + \code{RolesGuard} + \code{@Roles(ADMIN)} & 401/403 su accesso non autorizzato (anche via URL diretto) \\
+\bottomrule
+\end{tabularx}
+\renewcommand{\arraystretch}{1}
+
+\medskip
+\textbf{Nota:} la rotta frontend \code{/users} controlla solo l'autenticazione, non
+il ruolo; la vera barriera sul ruolo è il \textbf{backend}, che risponde 403 a un
+non-ADMIN che forzasse l'URL.
+
+% ====================================================================
+\section{Configurazione Nx}
+
+Avendo introdotto una dipendenza nuova \code{ui $\rightarrow$ @server/users} (per
+importare il tipo \code{UserListItem}), è stato eseguito \code{nx sync} per
+aggiornare i \emph{project references} di TypeScript.
+
+% ====================================================================
+\section{Verifica finale}
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \code{nx run-many -t build -p api ui} $\rightarrow$ \textbf{build OK} per
+        entrambi i progetti.
+  \item \code{nx lint}:
+        \begin{itemize}[leftmargin=1.2em]
+          \item \code{ui} $\rightarrow$ solo \emph{warning} preesistenti (\code{any}
+                + emoji), identici a \code{categories.page}.
+          \item \code{@server/\allowbreak users:lint} $\rightarrow$ fallisce per una
+                \textbf{dipendenza circolare PREESISTENTE} \code{@server/users}
+                $\leftrightarrow$ \code{@server/security} (controller $\leftrightarrow$
+                roles.guard). \textbf{Non introdotta da noi.}
+        \end{itemize}
+\end{itemize}
+
+% ====================================================================
+\section{Note / limiti noti (fuori scope della consegna)}
+
+\begin{itemize}[leftmargin=1.4em]
+  \item La pagina \code{/users} è protetta da \code{ProtectedRoute}
+        (autenticazione) ma \textbf{non} ricontrolla il ruolo a livello di rotta
+        frontend: un non-ADMIN che digita \code{/users} a mano riceve comunque
+        \textbf{403 dal backend} (la pagina mostra l'errore). La voce in navbar è
+        già nascosta ai non-ADMIN.
+  \item \code{POST /users} e \code{register} restano \textbf{pubbliche} e accettano
+        \code{role} (possibile \emph{privilege escalation}) --- comportamento
+        preesistente, fuori dallo scope.
+  \item Dipendenza circolare tra librerie server --- preesistente.
+\end{itemize}
+
+% ====================================================================
+\section{Elenco rapido dei file toccati}
+
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{X p{2.4cm} p{1.6cm}}
+\toprule
+\textbf{File} & \textbf{Tipo} & \textbf{Esercizio} \\
+\midrule
+\file{docs/Esercizio1\_WebML\_GestioneUtenti.md} & nuovo & Es.1 \\
+\file{libs/server/users/src/lib/interfaces/user-list-item.interface.ts} & nuovo & Es.2 \\
+\file{libs/server/users/src/index.ts} & modificato & Es.2 \\
+\file{libs/server/users/src/lib/users.service.ts} & modificato & Es.2 \\
+\file{apps/ui/src/features/users/users.api.ts} & nuovo & Es.3 \\
+\file{apps/ui/src/features/users/users.page.tsx} & nuovo & Es.3 \\
+\file{apps/ui/src/features/users/user-not-implemented.page.tsx} & nuovo & Es.3 \\
+\file{apps/ui/src/app/app.tsx} & modificato & Es.3 \\
+\file{apps/ui/src/features/layouts/app-layout.tsx} & modificato & Es.3 \\
+\bottomrule
+\end{tabularx}
+\renewcommand{\arraystretch}{1}
+
+\end{document}
