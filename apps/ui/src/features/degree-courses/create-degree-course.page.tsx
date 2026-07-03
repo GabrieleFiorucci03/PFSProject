@@ -85,24 +85,23 @@ export function CreateDegreeCoursePage() {
           >
             Dipartimento
           </label>
-          {/* Menu a tendina vincolato ai dipartimenti esistenti, stesso stile
-              dei <select> del form insegnamenti. */}
-          <select
+          {/* Campo libero con suggerimenti (datalist): si può scegliere un
+              dipartimento esistente o digitarne uno nuovo, come nel form di modifica. */}
+          <input
             id="department"
-            className="rounded-lg border border-slate-300 bg-white px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            list="departments-list"
+            autoComplete="off"
+            className="rounded-lg border border-slate-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             value={department}
             onChange={(e) => setDepartment(e.target.value)}
+            placeholder="Seleziona o scrivi un dipartimento..."
             required
-          >
-            <option value="" disabled>
-              Seleziona un dipartimento...
-            </option>
+          />
+          <datalist id="departments-list">
             {departments.map((dep) => (
-              <option key={dep} value={dep}>
-                {dep}
-              </option>
+              <option key={dep} value={dep} />
             ))}
-          </select>
+          </datalist>
         </div>
 
         {error && (
